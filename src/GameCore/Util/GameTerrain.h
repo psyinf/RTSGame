@@ -25,7 +25,7 @@ public:
 
 	void load(const std::string& base_name);
 
-	
+	void createGrid();
 
 	osg::ref_ptr<osg::Group> getTerrainNode();
 protected:

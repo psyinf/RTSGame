@@ -2,6 +2,9 @@
 #include "GameCore/GameCore.h"
 #include "GameCore/Util/TerrainPicker.h"
 #include <osgDB/FileNameUtils>
+#include <osg/PolygonOffset>
+#include <osg/PolygonMode>
+#include <osg/Material>
 
 
 
@@ -54,6 +57,25 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	}
 
 	mTerrain->addChild( terrain_tile.get() );
+	
+	{
+		osg::Group* grid_group = new osg::Group();
+		osg::StateSet* ss =grid_group->getOrCreateStateSet();
+		osg::PolygonOffset* polyoffset = new osg::PolygonOffset;
+		polyoffset->setFactor(-1.0f);
+		polyoffset->setUnits(-1.0f);
+		osg::PolygonMode* polymode = new osg::PolygonMode;
+		polymode->setMode(osg::PolygonMode::FRONT_AND_BACK,osg::PolygonMode::LINE);
+		ss->setAttributeAndModes(polyoffset,osg::StateAttribute::OVERRIDE|osg::StateAttribute::ON);
+		ss->setAttributeAndModes(polymode,osg::StateAttribute::OVERRIDE|osg::StateAttribute::ON);
+		osg::Material* material = new osg::Material;
+		ss->setAttributeAndModes(material,osg::StateAttribute::OVERRIDE|osg::StateAttribute::ON);
+		ss->setMode(GL_LIGHTING,osg::StateAttribute::OVERRIDE|osg::StateAttribute::OFF);
+		ss->setMode(GL_LINE_SMOOTH, osg::StateAttribute::ON);
+		grid_group->addChild(terrain_tile);
+		mTerrain->addChild(grid_group);
+	}
+
 	mTerrain->setTerrainTechniquePrototype(terrain_geometry_technique);
 	
 	osg::ref_ptr<osgGA::EventHandler> pick_handler = new nsGameCore::PickHandler(mrGameCore);
@@ -71,5 +93,18 @@ nsGameCore::Terrain::Terrain( nsGameCore::GameCore& ref_core )
 	,mrGameCore(ref_core)
 {
 
+}
+
+void nsGameCore::Terrain::createGrid()
+{
+	if (!mTerrain)
+	{
+		return;
+	}
+
+	for (unsigned int i = 0; i < mTerrain->getNumChildren(); ++i)
+	{
+		
+	}
 }
 

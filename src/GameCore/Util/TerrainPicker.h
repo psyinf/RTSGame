@@ -8,7 +8,7 @@ class GameCore;
 // class to handle events with a pick
 class PickHandler : public osgGA::GUIEventHandler {
 public:
-
+	osg::Geode* createFaceSelector();
 	PickHandler(nsGameCore::GameCore& game_core);
 
 	~PickHandler();
@@ -18,10 +18,15 @@ public:
 	void moveTerrain(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
 	void placeModel(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
 
-	  
+	void highlightSelected( osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
 
+	void getFace(const osgUtil::LineSegmentIntersector::Intersection& intersection);
 protected:
+	osg::ref_ptr<osg::Geometry> mSelectionGeometry;
 	nsGameCore::GameCore& mrGameCore;
+
+	bool mRightMousePressed;
+	bool mLeftMousePressed;
 };
 
 }
