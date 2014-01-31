@@ -2,6 +2,11 @@
 
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
+namespace osgTerrain
+{
+	class TerrainTile;
+}
+
 namespace nsGameCore{
 
 class GameCore;
@@ -21,6 +26,8 @@ public:
 	void highlightSelected( osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
 
 	void getFace(const osgUtil::LineSegmentIntersector::Intersection& intersection);
+
+	void getAreaFaces(const osgUtil::LineSegmentIntersector::Intersection& intersection, osgTerrain::TerrainTile*);
 protected:
 	osg::ref_ptr<osg::Geometry> mSelectionGeometry;
 	nsGameCore::GameCore& mrGameCore;
