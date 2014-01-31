@@ -36,6 +36,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mCurrentEditMode.addRegisteredMode("TERRAIN_UP");
 	mCurrentEditMode.addRegisteredMode("TERRAIN_DOWN");
 	mCurrentEditMode.addRegisteredMode("PLACE");
+	mCurrentEditMode.addRegisteredMode("LEVEL_TERRAIN");
 	mCurrentEditMode.setMode("DEFAULT");
 	//Add top level HUD
 	mHUDCamera = nsRenderer::Helpers::createHUDCamera(1024,1024);
@@ -95,12 +96,13 @@ void nsGameCore::GameCore::createNamedTextObject( const std::string& text_elem_n
 	
 }
 
-void nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientation, const std::string& model_type )
+void nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale,  const std::string& model_type )
 {
 	osg::Node* model = osgDB::readNodeFile(model_type);
 	osg::PositionAttitudeTransform* pat = new osg::PositionAttitudeTransform();
 	pat->setPosition(position);
 	pat->setAttitude(orientation);
+	pat->setScale(scale);
 	pat->addChild(model);
 	mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
 
@@ -156,4 +158,18 @@ void nsGameCore::EditMode::addRegisteredMode( const std::string& mode_name )
 nsGameCore::EditMode::EditMode() :mModeName()
 {
 
+}
+
+void nsGameCore::EditMode::addSubMode( const std::string& mode_name, const std::string& sub_mode_name )
+{
+	if (isRegisteredMode(mode_name))
+	{
+		//TODO
+	}
+}
+
+bool nsGameCore::EditMode::hasSubMode( const std::string& mode_name, const std::string& sub_mode_name ) const
+{
+	//TODO
+	return false;
 }

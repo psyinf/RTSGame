@@ -31,11 +31,16 @@ struct EditMode
 
 	std::string getCurrentModeName() const;
 
+	void addSubMode(const std::string& mode_name, const std::string& sub_mode_name);
+
+	bool hasSubMode(const std::string& mode_name, const std::string& sub_mode_name) const;
+
+	
 protected:
 	std::string mModeName;
-	
-
-	std::vector<std::string> mAvaiableModes;
+	std::string mSubModeName;
+	std::map<std::string,std::vector<std::string>>	mSubModes;
+	std::vector<std::string>						mAvaiableModes;
 };
 
 class GameCore
@@ -48,7 +53,7 @@ public:
 
 	void frame();
 
-	void placeModel(osg::Vec3d& position, osg::Quat& orientation, const std::string& model_type);
+	void placeModel(osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale, const std::string& model_type);
 
 	nsRenderer::Core& getRenderCore();
 	

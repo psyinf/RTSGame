@@ -71,7 +71,15 @@ void nsGameCore::PickHandler::placeModel( osgViewer::View* view, const osgGA::GU
 				osgTerrain::TerrainTile* terrain_tile = dynamic_cast<osgTerrain::TerrainTile*>((*iter));
 				if (terrain_tile)
 				{
-					mrGameCore.placeModel((*hitr).getWorldIntersectPoint(), osg::Quat(), "./data/models/default.flt");
+					osg::Vec3d local;
+					osgTerrain::Locator* locator = terrain_tile->getElevationLayer()->getLocator();
+					local = (*hitr).getWorldIntersectPoint();
+					locator->convertModelToLocal((*hitr).getWorldIntersectPoint(), local);
+					local = getClampedPosition(local, terrain_tile->getElevationLayer()->getNumColumns(), terrain_tile->getElevationLayer()->getNumColumns());
+					locator->convertLocalToModel(local, local);
+
+					mrGameCore.placeModel(local, osg::Quat(), osg::Vec3d(15,15,15), "./data/models/factory.obj");
+					return;
 				}
 			}
 		}
@@ -94,14 +102,40 @@ void nsGameCore::PickHandler::highlightSelected( osgViewer::View* view, const os
 				osgTerrain::TerrainTile* terrain_tile = dynamic_cast<osgTerrain::TerrainTile*>((*iter));
 				if (terrain_tile && (*hitr).drawable)
 				{
-					getFace(*hitr);
 					getAreaFaces(*hitr, terrain_tile);
+					return;
 				}
 			}
 			
 		}
 	}
 }
+
+
+void nsGameCore::PickHandler::pickTerrain( osgViewer::View* view, const osgGA::GUIEventAdapter& ea )
+{
+	osgUtil::LineSegmentIntersector::Intersections intersections;
+
+	if (view->computeIntersections(ea,intersections))
+	{
+		for(osgUtil::LineSegmentIntersector::Intersections::iterator hitr = intersections.begin();
+			hitr != intersections.end();
+			++hitr)
+		{
+			for (osg::NodePath::const_iterator iter = (*hitr).nodePath.begin(); iter != (*hitr).nodePath.end(); ++iter)
+			{
+				osgTerrain::TerrainTile* terrain_tile = dynamic_cast<osgTerrain::TerrainTile*>((*iter));
+				if (terrain_tile && (*hitr).drawable)
+				{
+					levelTerrain((*hitr), terrain_tile);
+					return;
+				}
+			}
+
+		}
+	}
+}
+
 
 bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa )
 {
@@ -114,7 +148,7 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	bool is_active = (ea. getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_SHIFT);
 	bool is_terrain_mode = is_active && boost::istarts_with(mrGameCore.getCurrentEditMode().getCurrentModeName(),"TERRAIN");
 	bool is_place_mode = is_active && boost::istarts_with(mrGameCore.getCurrentEditMode().getCurrentModeName(),"PLACE");
-	
+	bool is_level_terrain = is_active && boost::iequals(mrGameCore.getCurrentEditMode().getCurrentModeName(),"LEVEL_TERRAIN");
 	osgText::Text* text = mrGameCore.getNamedTextObject("CurrentMode");
 	text->setColor(is_active ? osg::Vec4(1,1,1,1) : osg::Vec4(1,1,1,0.2));
 	//pick triangle
@@ -149,6 +183,11 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 			else if (is_place_mode)
 			{
 				placeModel(view, ea);
+				treat_as_handled = true;
+			}
+			else if (is_level_terrain)
+			{
+				pickTerrain(view, ea);
 				treat_as_handled = true;
 			}
 
@@ -261,26 +300,7 @@ void nsGameCore::PickHandler::getAreaFaces( const osgUtil::LineSegmentIntersecto
 											)
 {
 
-	struct clampToGrid 
-	{
-		clampToGrid(unsigned int x_scale, unsigned int y_scale)
-			:mXScale(x_scale)
-			,mYScale(y_scale)
-		{
-		}
 
-		osg::Vec3 operator()(const osg::Vec3& v)
-		{
-			osg::Vec3d vr = osg::Vec3(((int)(mXScale * v[0]))/(float)(mXScale-1.0), ((int)(mYScale * v[1])) / (float)(mYScale-1.0), 0.0);
-			vr[0] = osg::clampBetween(vr[0], 0.0, 1.0 - (1.0 / mXScale));
-			vr[1] = osg::clampBetween(vr[1], 0.0, 1.0 - (1.0 / mYScale));
-			return vr;
-		}
-
-		unsigned int mXScale;
-		unsigned int mYScale;
-
-	};
 	osg::Geometry* geom = (intersection.drawable->asGeometry());
 	if (!geom || geom == mSelectionGeometry || !mSelectionGeometry)
 	{
@@ -312,13 +332,11 @@ void nsGameCore::PickHandler::getAreaFaces( const osgUtil::LineSegmentIntersecto
 		v[9] = local + osg::Vec3d( offset[0],0.0,0.0);
 		
 		osg::Vec3Array* selected_vertices = dynamic_cast<osg::Vec3Array*>( mSelectionGeometry->getVertexArray() );
-		//clamp
 		
 		
-		clampToGrid c2g(hfl->getNumColumns(), hfl->getNumRows());
 		for (std::vector<osg::Vec3d>::iterator iter = v.begin(); iter != v.end();++iter)
 		{
-			(*iter)=c2g(*iter);
+			(*iter)=getClampedPosition(*iter, hfl->getNumColumns(), hfl->getNumRows());
 			(*iter)[2] = hfl->getHeightField()->getHeight((*iter)[0] * hfl->getNumColumns(), (*iter)[1] * hfl->getNumRows()) + 0.5;
 			locator->convertLocalToModel((*iter), (*iter));
 			
@@ -329,6 +347,58 @@ void nsGameCore::PickHandler::getAreaFaces( const osgUtil::LineSegmentIntersecto
 		mSelectionGeometry->dirtyBound();
 	}
 
+}
+
+osg::Vec3d nsGameCore::PickHandler::getClampedPosition( const osg::Vec3d& pos, unsigned int x_scale, unsigned int y_scale ) const
+{
+	osg::Vec3d vr = osg::Vec3(((int)(x_scale * pos[0]))/(float)(x_scale-1.0), ((int)(y_scale * pos[1])) / (float)(y_scale-1.0), pos[2]);
+	vr[0] = osg::clampBetween(vr[0], 0.0, 1.0 - (1.0 / x_scale));
+	vr[1] = osg::clampBetween(vr[1], 0.0, 1.0 - (1.0 / y_scale));
+	return vr;
+}
+
+void nsGameCore::PickHandler::levelTerrain( const osgUtil::LineSegmentIntersector::Intersection& intersection, osgTerrain::TerrainTile* terrain_tile )
+{
+	osg::Vec3d local;
+	osgTerrain::Locator* locator = terrain_tile->getElevationLayer()->getLocator();
+	locator->convertModelToLocal(intersection.getWorldIntersectPoint(), local);
+
+	osgTerrain::HeightFieldLayer* hfl = dynamic_cast<osgTerrain::HeightFieldLayer*>(terrain_tile->getElevationLayer());
+	if(hfl)
+	{
+		osg::Vec3d offset = osg::Vec3(1.0 / hfl->getNumColumns(), 1.0 / hfl->getNumRows() , 0.0);
+
+		std::vector<osg::Vec3d> v;
+		v.resize(10);
+
+		v[0] = local;
+		v[1] = local + osg::Vec3d(offset[0],0.0,0.0);
+		v[2] = local + osg::Vec3d(offset[0],offset[1],0.0);
+		v[3] = local + osg::Vec3d(0.0,offset[1],0.0);
+		v[4] = local + osg::Vec3d(-offset[0],offset[1],0.0);
+		v[5] = local + osg::Vec3d(-offset[0],0.0,0.0);
+		v[6] = local + osg::Vec3d(-offset[0],-offset[1],0.0);
+		v[7] = local + osg::Vec3d(0.0,-offset[1],0.0);
+		v[8] = local + osg::Vec3d( offset[0],-offset[1],0.0);
+		v[9] = local + osg::Vec3d( offset[0],0.0,0.0);
+
+		osg::Vec3Array* selected_vertices = dynamic_cast<osg::Vec3Array*>( mSelectionGeometry->getVertexArray() );
+		osgTerrain::ModifyingTerrainTechnique* mod_technique = dynamic_cast<osgTerrain::ModifyingTerrainTechnique*>(terrain_tile->getTerrainTechnique());
+		if (mod_technique)
+		{
+			double new_height = 0;
+			mod_technique->getHeight(local[0], local[1], new_height);
+
+			for (std::vector<osg::Vec3d>::iterator iter = v.begin(); iter != v.end();++iter)
+			{
+				(*iter)=getClampedPosition(*iter, hfl->getNumColumns(), hfl->getNumRows());
+				//	(*iter)[2] = hfl->getHeightField()->getHeight((*iter)[0] * hfl->getNumColumns(), (*iter)[1] * hfl->getNumRows()) + 0.5;
+				mod_technique->setHeight((*iter)[0], (*iter)[1], new_height);
+			}
+		}
+
+		
+	}
 }
 
 
