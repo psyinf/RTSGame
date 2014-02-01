@@ -1,6 +1,11 @@
 #include "GameCore.h"
+#include "GameArea.h"
+
 #include <Core/Core.h>
+
 #include "Util/GameTerrain.h"
+
+
 #include <boost/algorithm/string.hpp>
 #include <Core/StandardHandlers.h>
 #include <Common/CommonHelpers.h>
@@ -31,6 +36,9 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mTerrain->load("./data/levels/Channelled land.tif" );
 	mrCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
 	
+	mGameArea.reset(new nsGameCore::GameArea(*this));
+	
+
 
 	mCurrentEditMode.addRegisteredMode("DEFAULT");
 	mCurrentEditMode.addRegisteredMode("TERRAIN_UP");
@@ -104,8 +112,40 @@ void nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientat
 	pat->setAttitude(orientation);
 	pat->setScale(scale);
 	pat->addChild(model);
+	pat->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON); 
 	mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
 
+}
+
+
+
+nsGameCore::CellAdress nsGameCore::GameCore::calculateCellAdress( float x, float y, unsigned int level /*= 0*/ )
+{
+	osgTerrain::TerrainTile* terrain_tile = mTerrain->getTerrainTile(x,y);
+	if (!terrain_tile)
+	{
+		return nsGameCore::CellAdress();
+	}
+	else
+	{
+		osgTerrain::ModifyingTerrainTechnique* mod_technique = dynamic_cast<osgTerrain::ModifyingTerrainTechnique*>(terrain_tile->getTerrainTechnique());
+		if (mod_technique)
+		{
+			return nsGameCore::CellAdress(mod_technique->getTilePosition(osg::Vec3(x,y,0)));
+		}
+	}
+	
+
+}
+
+nsGameCore::CellDataPtr nsGameCore::GameCore::getCellData( const CellAdress& address )
+{
+	return mGameArea->getCellData(address);
+}
+
+void nsGameCore::GameCore::setCellData( const CellAdress& address, CellDataPtr cell_data_ptr )
+{
+	mGameArea->setCellData(address, cell_data_ptr);
 }
 
 std::string nsGameCore::EditMode::getCurrentModeName() const
@@ -173,3 +213,4 @@ bool nsGameCore::EditMode::hasSubMode( const std::string& mode_name, const std::
 	//TODO
 	return false;
 }
+

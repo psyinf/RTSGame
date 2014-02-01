@@ -1,5 +1,6 @@
 #include "TerrainPicker.h"
 #include <GameCore/GameCore.h>
+#include <GameCore/GameArea.h>
 #include "TerrainTechniques.h"
 #include <Core/Core.h>
 
@@ -49,7 +50,7 @@ void nsGameCore::PickHandler::moveTerrain( osgViewer::View* view, const osgGA::G
 			}
 		}
 		//update selection
-		highlightSelected(view, ea);
+		//highlightSelected(view, ea);
 	}
 
 	//setLabel(gdlist);
@@ -75,11 +76,27 @@ void nsGameCore::PickHandler::placeModel( osgViewer::View* view, const osgGA::GU
 					osgTerrain::Locator* locator = terrain_tile->getElevationLayer()->getLocator();
 					local = (*hitr).getWorldIntersectPoint();
 					locator->convertModelToLocal((*hitr).getWorldIntersectPoint(), local);
-					local = getClampedPosition(local, terrain_tile->getElevationLayer()->getNumColumns(), terrain_tile->getElevationLayer()->getNumColumns());
-					locator->convertLocalToModel(local, local);
 
-					mrGameCore.placeModel(local, osg::Quat(), osg::Vec3d(15,15,15), "./data/models/factory.obj");
-					return;
+
+					
+					nsGameCore::CellAdress address = mrGameCore.calculateCellAdress(local[0], local[1]);
+					if (mrGameCore.getCellData(address))
+					{
+						//address.print();
+					}
+					else
+					{
+						mrGameCore.setCellData(address, boost::shared_ptr<nsGameCore::CellData>(new nsGameCore::CellData()));
+						address.print();
+						//
+						local = getClampedPosition(local, terrain_tile->getElevationLayer()->getNumColumns(), terrain_tile->getElevationLayer()->getNumColumns());
+						locator->convertLocalToModel(local, local);
+						mrGameCore.placeModel(local, osg::Quat(), osg::Vec3d(15,15,15), "./data/models/factory.obj");
+						return;
+					}
+					
+
+				
 				}
 			}
 		}
@@ -87,28 +104,29 @@ void nsGameCore::PickHandler::placeModel( osgViewer::View* view, const osgGA::GU
 }
 
 
-void nsGameCore::PickHandler::highlightSelected( osgViewer::View* view, const osgGA::GUIEventAdapter& ea)
+void nsGameCore::PickHandler::highlightSelected()
 {
-	osgUtil::LineSegmentIntersector::Intersections intersections;
-	
-	if (view->computeIntersections(ea,intersections))
+	if ("PLACE" == mrGameCore.getCurrentEditMode().getCurrentModeName())
 	{
-		for(osgUtil::LineSegmentIntersector::Intersections::iterator hitr = intersections.begin();
-			hitr != intersections.end();
-			++hitr)
+		nsGameCore::CellAdress cell_address = getCellAdress(mCurrentPickInfo.mTerrainTile, mCurrentPickInfo.mIntersection.getWorldIntersectPoint());
+		if (mrGameCore.getCellData(cell_address))
 		{
-			for (osg::NodePath::const_iterator iter = (*hitr).nodePath.begin(); iter != (*hitr).nodePath.end(); ++iter)
-			{
-				osgTerrain::TerrainTile* terrain_tile = dynamic_cast<osgTerrain::TerrainTile*>((*iter));
-				if (terrain_tile && (*hitr).drawable)
-				{
-					getAreaFaces(*hitr, terrain_tile);
-					return;
-				}
-			}
-			
+			setSelectionColor(osg::Vec4(1,0,0,0.5));
 		}
+		else
+		{
+			setSelectionColor(osg::Vec4(0,1,0,0.5));
+							
+		}
+				
 	}
+	else
+	{
+		setSelectionColor(osg::Vec4(0,1,0,0.5));
+	}
+
+	getAreaFaces(mCurrentPickInfo.mIntersection, mCurrentPickInfo.mTerrainTile);
+
 }
 
 
@@ -143,6 +161,7 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	{
 		return false;
 	}
+	
 	bool treat_as_handled =false;
 	//determine mode
 	bool is_active = (ea. getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_SHIFT);
@@ -157,8 +176,14 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	{
 		return false;
 	}
-	highlightSelected(view, ea);
+	//highlightSelected(view, ea);
+	bool pick_info = mCurrentPickInfo.pick(view, ea);
+	if (pick_info)
+	{
+		highlightSelected();
+	}
 
+	
 
 	switch(ea.getEventType())
 	{
@@ -401,5 +426,47 @@ void nsGameCore::PickHandler::levelTerrain( const osgUtil::LineSegmentIntersecto
 	}
 }
 
+void nsGameCore::PickHandler::setSelectionColor( const osg::Vec4& color )
+{
+	osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
+	(*colors)[0] = color;
+	mSelectionGeometry->setColorArray( colors.get() );
+	mSelectionGeometry->getColorArray()->dirty();
+	mSelectionGeometry->setColorBinding( osg::Geometry::BIND_OVERALL );
+}
+
+nsGameCore::CellAdress nsGameCore::PickHandler::getCellAdress( osgTerrain::TerrainTile* terrain_tile, osg::Vec3d world_position )
+{
+	osg::Vec3d local;
+	osgTerrain::Locator* locator = terrain_tile->getElevationLayer()->getLocator();
+	locator->convertModelToLocal(world_position, local);
+	
+	return  mrGameCore.calculateCellAdress(local[0], local[1]);
+}
 
 
+
+
+bool nsGameCore::PickHandler::PickInfo::pick( osgViewer::View* view, const osgGA::GUIEventAdapter& ea )
+{
+	osgUtil::LineSegmentIntersector::Intersections intersections;
+	if (view->computeIntersections(ea,intersections))
+	{
+		for(osgUtil::LineSegmentIntersector::Intersections::iterator hitr = intersections.begin();
+			hitr != intersections.end();
+			++hitr)
+		{
+			for (osg::NodePath::const_iterator iter = (*hitr).nodePath.begin(); iter != (*hitr).nodePath.end(); ++iter)
+			{
+				osgTerrain::TerrainTile* terrain_tile = dynamic_cast<osgTerrain::TerrainTile*>((*iter));
+				if (terrain_tile && (*hitr).drawable)
+				{
+					mTerrainTile = terrain_tile;
+					mIntersection = (*hitr);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}

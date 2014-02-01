@@ -14,7 +14,6 @@ namespace osgTerrain {
 
 		META_Object(osgTerrain, ModifyingTerrainTechnique);
 
-
 		~ModifyingTerrainTechnique();
 
 		virtual void init(int dirtyMask, bool assumeMultiThreaded);
@@ -30,6 +29,10 @@ namespace osgTerrain {
 		bool getHeight(double x, double y, double& height);
 
 		bool getExtents(osg::Vec3d& top_left, osg::Vec3d& bottom_right);
+
+		osg::Vec3d getClampedPosition( const osg::Vec3d& pos ) const;
+
+		osg::Vec3i getTilePosition(const osg::Vec3d& clamped_normalized) const;
 
 	};
 

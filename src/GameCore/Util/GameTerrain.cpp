@@ -18,7 +18,11 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	//osgTerrain::Terrain* terrain = new osgTerrain::Terrain;
 	const std::string height_field_path = osgDB::getNameLessExtension(base_name) + "_height" + osgDB::getFileExtensionIncludingDot(base_name) +".gdal";
 	const std::string diff_field_path = osgDB::getNameLessExtension(base_name) + "_diff" + osgDB::getFileExtensionIncludingDot(base_name) +".gdal";
-	osg::HeightField* height_field = osgDB::readHeightFieldFile(height_field_path);
+	osg::ref_ptr<osgDB::Options> options = new osgDB::Options;
+	options->setBuildKdTreesHint(osgDB::Options::BUILD_KDTREES);
+
+
+	osg::HeightField* height_field = osgDB::readHeightFieldFile(height_field_path,options);
 	//height_field->setXInterval(16);
 	//height_field->setYInterval(16);
 	osg::ref_ptr<osgTerrain::GeometryTechnique> terrain_geometry_technique = new osgTerrain::ModifyingTerrainTechnique();
@@ -35,7 +39,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	//create a locator to move/scale the data
 	osg::ref_ptr<osgTerrain::Locator> Locator1 = new osgTerrain::Locator;
 	Locator1->setCoordinateSystemType( osgTerrain::Locator::PROJECTED );
-	Locator1->setTransformAsExtents( 0.0, 0.0, 2048, 2048 );
+	Locator1->setTransformAsExtents( 0.0, 0.0, mTileSize[0], mTileSize[1] );
 
 	//create a height field layer from the height field, using the locator
 	osg::Texture::FilterMode filter = osg::Texture::LINEAR;
@@ -91,20 +95,20 @@ nsGameCore::Terrain::~Terrain()
 nsGameCore::Terrain::Terrain( nsGameCore::GameCore& ref_core ) 
 	:mTerrain( new osgTerrain::Terrain)
 	,mrGameCore(ref_core)
+	,mTileSize(2048,2048)
 {
 
 }
 
-void nsGameCore::Terrain::createGrid()
+osgTerrain::TerrainTile* nsGameCore::Terrain::getTerrainTile( float x, float y )
 {
-	if (!mTerrain)
+	//childs are added row-wise (x)
+	//for now we only have one tile, so normalized coordinates are supposed to be between 0..1
+	if (x < 1.0 && x >= 0.0 && y < 1.0 && y >= 0.0 && mTerrain->getNumChildren() > 0)
 	{
-		return;
+		osgTerrain::TerrainTile* terrain_tile = dynamic_cast<osgTerrain::TerrainTile*>(mTerrain->getChild(0));
+		return terrain_tile;
 	}
-
-	for (unsigned int i = 0; i < mTerrain->getNumChildren(); ++i)
-	{
-		
-	}
+	return 0;
 }
 

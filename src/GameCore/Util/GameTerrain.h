@@ -25,10 +25,12 @@ public:
 
 	void load(const std::string& base_name);
 
-	void createGrid();
-
 	osg::ref_ptr<osg::Group> getTerrainNode();
+
+	osgTerrain::TerrainTile* getTerrainTile(float x, float y);
+
 protected:
+	osg::Vec2						  mTileSize;
 	osg::ref_ptr<osgTerrain::Terrain> mTerrain;
 	
 	nsGameCore::GameCore&		 mrGameCore;

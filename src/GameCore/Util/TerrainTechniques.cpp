@@ -100,3 +100,31 @@ bool osgTerrain::ModifyingTerrainTechnique::getExtents(osg::Vec3d& top_left, osg
 	}
 	return false;
 }
+
+osg::Vec3d osgTerrain::ModifyingTerrainTechnique::getClampedPosition( const osg::Vec3d& pos ) const
+{
+	if (_terrainTile)
+	{
+		float x_scale = _terrainTile->getElevationLayer()->getNumColumns();
+		float y_scale = _terrainTile->getElevationLayer()->getNumRows();
+		osg::Vec3d vr = osg::Vec3(((int)(x_scale * pos[0]))/(float)(x_scale-1.0), ((int)(y_scale * pos[1])) / (float)(y_scale-1.0), pos[2]);
+		vr[0] = osg::clampBetween(vr[0], 0.0, 1.0 - (1.0 / x_scale));
+		vr[1] = osg::clampBetween(vr[1], 0.0, 1.0 - (1.0 / y_scale));
+		return vr;
+	}
+	return osg::Vec3d();
+	
+}
+
+osg::Vec3i osgTerrain::ModifyingTerrainTechnique::getTilePosition( const osg::Vec3d& clamped_normalized ) const
+{
+	osg::Vec3d world_pos;
+	if (_terrainTile)
+	{
+		
+		osg::Vec3d clamped  = this->getClampedPosition(clamped_normalized);
+		osgTerrain::Locator* locator = _terrainTile->getElevationLayer()->getLocator();
+		locator->convertLocalToModel(clamped, world_pos);
+	}
+	return osg::Vec3i(world_pos[0], world_pos[1], world_pos[2]);
+}

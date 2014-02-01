@@ -17,6 +17,12 @@ namespace nsRenderer
 namespace nsGameCore{
 
 class Terrain;
+class GameArea;
+struct CellData;
+struct CellAdress;
+
+typedef boost::shared_ptr<CellData> CellDataPtr;
+
 
 struct EditMode
 {
@@ -35,6 +41,7 @@ struct EditMode
 
 	bool hasSubMode(const std::string& mode_name, const std::string& sub_mode_name) const;
 
+	
 	
 protected:
 	std::string mModeName;
@@ -55,6 +62,12 @@ public:
 
 	void placeModel(osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale, const std::string& model_type);
 
+	CellDataPtr getCellData(const CellAdress& address);
+
+	void setCellData(const CellAdress& address, CellDataPtr cell_data_ptr);
+	
+
+
 	nsRenderer::Core& getRenderCore();
 	
 	EditMode& getCurrentEditMode();
@@ -63,16 +76,25 @@ public:
 
 	void setCurrentEditMode(const EditMode& edit_mode);
 
+	
+	
 	osg::Camera* getHUDCamera();
 
 	osgText::Text* getNamedTextObject(const std::string& );
+
 	void createNamedTextObject(const std::string&, osg::ref_ptr<osgText::Text> text_node );
 
+	CellAdress calculateCellAdress(float x, float y, unsigned int level = 0);
+
 protected:
-	EditMode mCurrentEditMode;
-	nsRenderer::Core& mrCore;
-	osg::ref_ptr<osg::Camera> mHUDCamera;
-	boost::shared_ptr<nsGameCore::Terrain> mTerrain;
+	EditMode											mCurrentEditMode;
+	nsRenderer::Core&									mrCore;
+	boost::shared_ptr<nsGameCore::Terrain>				mTerrain;
+	boost::shared_ptr<nsGameCore::GameArea>				mGameArea;
+
+
+	//those HUD things should be refactored to a separate module
+	osg::ref_ptr<osg::Camera>							mHUDCamera;
 	std::map<std::string, osg::ref_ptr<osgText::Text>> mHUDTextElements;
 	osg::ref_ptr<osg::Geode> mTextNode;
 
