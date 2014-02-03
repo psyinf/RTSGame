@@ -18,6 +18,7 @@ namespace nsGameCore{
 
 class Terrain;
 class GameArea;
+class GameModelManager;
 struct CellData;
 struct CellAdress;
 
@@ -29,7 +30,7 @@ struct EditMode
 	EditMode();
 	void addRegisteredMode(const std::string& mode_name);
 	
-	bool isRegisteredMode(const std::string& mode_name);
+	bool isRegisteredMode(const std::string& mode_name) const;
 
 	std::string nextMode();
 
@@ -41,13 +42,16 @@ struct EditMode
 
 	bool hasSubMode(const std::string& mode_name, const std::string& sub_mode_name) const;
 
+	std::string getSubMode() const;
+
+	void setModel(CellDataPtr& cell_data, const std::string& model_type  );
 	
-	
+	std::string nextSubMode();
 protected:
 	std::string mModeName;
 	std::string mSubModeName;
 	std::map<std::string,std::vector<std::string>>	mSubModes;
-	std::vector<std::string>						mAvaiableModes;
+	std::vector<std::string>						mAvailableModes;
 };
 
 class GameCore
@@ -69,6 +73,8 @@ public:
 
 
 	nsRenderer::Core& getRenderCore();
+
+	nsGameCore::GameModelManager& getModelManager();
 	
 	EditMode& getCurrentEditMode();
 
@@ -91,6 +97,7 @@ protected:
 	nsRenderer::Core&									mrCore;
 	boost::shared_ptr<nsGameCore::Terrain>				mTerrain;
 	boost::shared_ptr<nsGameCore::GameArea>				mGameArea;
+	boost::shared_ptr<nsGameCore::GameModelManager>		mModelManager;
 
 
 	//those HUD things should be refactored to a separate module

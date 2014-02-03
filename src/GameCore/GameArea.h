@@ -4,6 +4,7 @@
 #include <osg/Vec3i>
 #include <boost/unordered_map.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/shared_ptr.hpp>
 namespace nsGameCore{
 
 class Terrain;
@@ -52,7 +53,7 @@ struct CellAdress
 
 struct CellData
 {
-	CellAdress adress;
+	CellAdress address;
 
 };
 
@@ -62,37 +63,15 @@ class GameArea
 {
 	
 public:
-	GameArea(nsGameCore::GameCore& ref_game_core)
-		:mrGameCore(ref_game_core)
-	{
-	}
+	GameArea(nsGameCore::GameCore& ref_game_core);
 
-	bool isFree(const CellAdress& cell_address) const
-	{
-		return (0 == mCellData.count(cell_address));
-	}
+	bool isFree(const CellAdress& cell_address) const;
 
-	void setUsed(const CellAdress& cell_address, CellDataPtr cell_data)
-	{
-		mCellData[cell_address] = cell_data;
-	}
+	void setUsed(const CellAdress& cell_address, CellDataPtr cell_data);
 
-	CellDataPtr getCellData(const CellAdress& cell_address) const
-	{
-		if (isFree(cell_address))
-		{
-			return CellDataPtr();
-		}
-		return mCellData.at(cell_address);
-	}
-	void setCellData(const CellAdress& cell_address, CellDataPtr cell_data)
-	{
-		if (!isFree(cell_address))
-		{
-			return;
-		}
-		mCellData[cell_address] = cell_data;
-	}
+	CellDataPtr getCellData(const CellAdress& cell_address) const;
+	
+	void setCellData(const CellAdress& cell_address, CellDataPtr cell_data);
 
 	
 protected:

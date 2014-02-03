@@ -4,7 +4,7 @@
 #include <Core/Core.h>
 
 #include "Util/GameTerrain.h"
-
+#include "Util/GameModels.h"
 
 #include <boost/algorithm/string.hpp>
 #include <Core/StandardHandlers.h>
@@ -36,6 +36,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mTerrain->load("./data/levels/Channelled land.tif" );
 	mrCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
 	
+	mModelManager.reset(new nsGameCore::GameModelManager("./data/models"));
 	mGameArea.reset(new nsGameCore::GameArea(*this));
 	
 
@@ -45,6 +46,14 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mCurrentEditMode.addRegisteredMode("TERRAIN_DOWN");
 	mCurrentEditMode.addRegisteredMode("PLACE");
 	mCurrentEditMode.addRegisteredMode("LEVEL_TERRAIN");
+	
+	std::vector<std::string> model_names;
+	mModelManager->getRegisteredModelNames(model_names);
+	for (auto iter = model_names.begin(); iter != model_names.end(); ++iter)
+	{
+		mCurrentEditMode.addSubMode("PLACE", *iter);
+	}
+
 	mCurrentEditMode.setMode("DEFAULT");
 	//Add top level HUD
 	mHUDCamera = nsRenderer::Helpers::createHUDCamera(1024,1024);
@@ -106,12 +115,18 @@ void nsGameCore::GameCore::createNamedTextObject( const std::string& text_elem_n
 
 void nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale,  const std::string& model_type )
 {
-	osg::Node* model = osgDB::readNodeFile(model_type);
+	//osg::Node* model = osgDB::readNodeFile(model_type);
+	osg::Node* model_node = mModelManager->getModel(model_type);
+	if (!model_node)
+	{
+		//TODO: bark here
+		return;
+	}
 	osg::PositionAttitudeTransform* pat = new osg::PositionAttitudeTransform();
 	pat->setPosition(position);
 	pat->setAttitude(orientation);
 	pat->setScale(scale);
-	pat->addChild(model);
+	pat->addChild(model_node);
 	pat->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON); 
 	mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
 
@@ -148,6 +163,11 @@ void nsGameCore::GameCore::setCellData( const CellAdress& address, CellDataPtr c
 	mGameArea->setCellData(address, cell_data_ptr);
 }
 
+nsGameCore::GameModelManager& nsGameCore::GameCore::getModelManager()
+{
+	return *mModelManager;
+}
+
 std::string nsGameCore::EditMode::getCurrentModeName() const
 {
 	return mModeName;
@@ -165,37 +185,40 @@ bool nsGameCore::EditMode::setMode( const std::string& new_mode_name )
 
 std::string nsGameCore::EditMode::nextMode()
 {
-	auto iter = std::find(mAvaiableModes.begin(), mAvaiableModes.end(), mModeName);
-	if (iter != mAvaiableModes.end())
+	auto iter = std::find(mAvailableModes.begin(), mAvailableModes.end(), mModeName);
+	if (iter != mAvailableModes.end())
 	{
 		++iter;
-		if (iter == mAvaiableModes.end())
+		if (iter == mAvailableModes.end())
 		{
-			iter = mAvaiableModes.begin();
+			iter = mAvailableModes.begin();
 		}
 		mModeName = (*iter);
 	}
 	else
 	{
-		mModeName = *mAvaiableModes.begin();
+		mModeName = *mAvailableModes.begin();
 	}
 	return mModeName;
 }
 
-bool nsGameCore::EditMode::isRegisteredMode( const std::string& mode_name )
+bool nsGameCore::EditMode::isRegisteredMode( const std::string& mode_name ) const
 {
-	return (mAvaiableModes.end() != std::find(mAvaiableModes.begin(), mAvaiableModes.end(), boost::to_upper_copy(mode_name)));
+	return (mAvailableModes.end() != std::find(mAvailableModes.begin(), mAvailableModes.end(), boost::to_upper_copy(mode_name)));
 }
 
 void nsGameCore::EditMode::addRegisteredMode( const std::string& mode_name )
 {
 	if (!isRegisteredMode(mode_name))
 	{
-		mAvaiableModes.push_back(boost::to_upper_copy(mode_name));
+		mAvailableModes.push_back(boost::to_upper_copy(mode_name));
+		mSubModes.insert(std::make_pair(mode_name, std::vector<std::string>()));
 	}
 }
 
-nsGameCore::EditMode::EditMode() :mModeName()
+nsGameCore::EditMode::EditMode() 
+	:mModeName()
+	,mSubModeName()
 {
 
 }
@@ -204,13 +227,58 @@ void nsGameCore::EditMode::addSubMode( const std::string& mode_name, const std::
 {
 	if (isRegisteredMode(mode_name))
 	{
-		//TODO
+		auto find_iter = mSubModes.find(boost::to_upper_copy(mode_name));
+		assert(find_iter != mSubModes.end());
+
+		std::vector<std::string>& sub_modes = (*find_iter).second;
+		if (sub_modes.end() == std::find(sub_modes.begin(), sub_modes.end(), sub_mode_name) )
+		{
+			sub_modes.push_back(boost::to_upper_copy(sub_mode_name));
+		}
 	}
 }
 
 bool nsGameCore::EditMode::hasSubMode( const std::string& mode_name, const std::string& sub_mode_name ) const
 {
-	//TODO
+	if (isRegisteredMode(mode_name))
+	{
+		return (0 != mSubModes.count(sub_mode_name));
+	}
 	return false;
+}
+
+std::string nsGameCore::EditMode::getSubMode() const
+{
+	return mSubModeName;
+}
+
+std::string nsGameCore::EditMode::nextSubMode()
+{
+	auto iter = mSubModes.find(mModeName);
+	if (iter != mSubModes.end())
+	{
+		std::vector<std::string>& sub_modes = (*iter).second;
+		auto sub_iter = std::find(sub_modes.begin(), sub_modes.end(), mSubModeName);
+		if (sub_modes.empty())
+		{
+			mSubModeName = "";
+		}
+		else if (sub_iter == sub_modes.end())
+		{
+			mSubModeName = (*sub_modes.begin());
+		}
+		else
+		{
+			++sub_iter;
+			if (sub_iter == sub_modes.end())
+			{
+				sub_iter = sub_modes.begin();
+			}
+			mSubModeName = (*sub_iter);
+		}
+		return mSubModeName;
+	}
+	return "";
+
 }
 

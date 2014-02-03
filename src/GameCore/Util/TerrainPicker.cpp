@@ -91,7 +91,7 @@ void nsGameCore::PickHandler::placeModel( osgViewer::View* view, const osgGA::GU
 						//
 						local = getClampedPosition(local, terrain_tile->getElevationLayer()->getNumColumns(), terrain_tile->getElevationLayer()->getNumColumns());
 						locator->convertLocalToModel(local, local);
-						mrGameCore.placeModel(local, osg::Quat(), osg::Vec3d(15,15,15), "./data/models/factory.obj");
+						mrGameCore.placeModel(local, osg::Quat(), osg::Vec3d(15,15,15), mrGameCore.getCurrentEditMode().getSubMode());
 						return;
 					}
 					
@@ -169,6 +169,7 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	bool is_place_mode = is_active && boost::istarts_with(mrGameCore.getCurrentEditMode().getCurrentModeName(),"PLACE");
 	bool is_level_terrain = is_active && boost::iequals(mrGameCore.getCurrentEditMode().getCurrentModeName(),"LEVEL_TERRAIN");
 	osgText::Text* text = mrGameCore.getNamedTextObject("CurrentMode");
+	osgText::Text* text_sub = mrGameCore.getNamedTextObject("CurrentSubMode");
 	text->setColor(is_active ? osg::Vec4(1,1,1,1) : osg::Vec4(1,1,1,0.2));
 	//pick triangle
 	osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
@@ -248,6 +249,12 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 				osgText::Text* txt = mrGameCore.getNamedTextObject("CurrentMode");
 				txt->setText(mrGameCore.getCurrentEditMode().nextMode());
 			}
+			if (ea.getKey()=='v')
+			{
+				osgText::Text* sub_txt = mrGameCore.getNamedTextObject("CurrentSubMode");
+				sub_txt->setText(mrGameCore.getCurrentEditMode().nextSubMode());
+			}
+
 			return false;
 		}
 	default:
@@ -269,6 +276,13 @@ nsGameCore::PickHandler::PickHandler(nsGameCore::GameCore& game_core)
 	text_node->setFont("fonts/arial.ttf");
 	text_node->setPosition(osg::Vec3(20.0,500,0.0));
 	mrGameCore.createNamedTextObject("CurrentMode", text_node);
+
+	osgText::Text* sub_text_node = new osgText::Text();
+	sub_text_node->setFont("fonts/arial.ttf");
+	sub_text_node->setPosition(osg::Vec3(20.0,600,0.0));
+	mrGameCore.createNamedTextObject("CurrentSubMode", sub_text_node);
+
+	
 	osg::Geode* selection_geometry = createFaceSelector();
 	mrGameCore.getRenderCore().getSubRoot("MODEL_ROOT")->addChild(selection_geometry);
 }
