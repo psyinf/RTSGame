@@ -5,6 +5,7 @@
 
 #include "Util/GameTerrain.h"
 #include "Util/GameModels.h"
+#include "Util/HUDManager.h"
 
 #include <boost/algorithm/string.hpp>
 #include <Core/StandardHandlers.h>
@@ -62,6 +63,8 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	nsRenderer::CamResizeHandler* cam_resize_handler = new nsRenderer::CamResizeHandler(mHUDCamera);
 	mrCore.addEventHandler(cam_resize_handler);
 	mHUDCamera->addChild(mTextNode);
+
+	mHUDManager = boost::shared_ptr<HUDManager>(new HUDManager(*this));
 }
 
 nsGameCore::GameCore::~GameCore()
@@ -115,21 +118,26 @@ void nsGameCore::GameCore::createNamedTextObject( const std::string& text_elem_n
 
 void nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale,  const std::string& model_type )
 {
-	//osg::Node* model = osgDB::readNodeFile(model_type);
-	osg::Node* model_node = mModelManager->getModel(model_type);
-	if (!model_node)
+	try 
 	{
-		//TODO: bark here
-		return;
+		boost::shared_ptr<nsGameCore::GameModel> game_model = mModelManager->createGameModelInstance(model_type);
+		if (!game_model)
+		{
+			//TODO: bark here
+			return;
+		}
+		osg::PositionAttitudeTransform* pat = new osg::PositionAttitudeTransform();
+		pat->setPosition(position);
+		pat->setAttitude(orientation);
+		pat->setScale(scale);
+		pat->addChild(game_model->getGraphicalModel());
+		pat->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON); 
+		mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
 	}
-	osg::PositionAttitudeTransform* pat = new osg::PositionAttitudeTransform();
-	pat->setPosition(position);
-	pat->setAttitude(orientation);
-	pat->setScale(scale);
-	pat->addChild(model_node);
-	pat->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON); 
-	mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
-
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
 }
 
 
@@ -137,11 +145,7 @@ void nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientat
 nsGameCore::CellAdress nsGameCore::GameCore::calculateCellAdress( float x, float y, unsigned int level /*= 0*/ )
 {
 	osgTerrain::TerrainTile* terrain_tile = mTerrain->getTerrainTile(x,y);
-	if (!terrain_tile)
-	{
-		return nsGameCore::CellAdress();
-	}
-	else
+	if (terrain_tile)
 	{
 		osgTerrain::ModifyingTerrainTechnique* mod_technique = dynamic_cast<osgTerrain::ModifyingTerrainTechnique*>(terrain_tile->getTerrainTechnique());
 		if (mod_technique)
@@ -149,7 +153,7 @@ nsGameCore::CellAdress nsGameCore::GameCore::calculateCellAdress( float x, float
 			return nsGameCore::CellAdress(mod_technique->getTilePosition(osg::Vec3(x,y,0)));
 		}
 	}
-	
+	return nsGameCore::CellAdress();
 
 }
 

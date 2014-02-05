@@ -255,7 +255,7 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 				sub_txt->setText(mrGameCore.getCurrentEditMode().nextSubMode());
 			}
 
-			return false;
+			return true;
 		}
 	default:
 		break;

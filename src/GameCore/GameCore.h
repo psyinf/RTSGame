@@ -19,6 +19,7 @@ namespace nsGameCore{
 class Terrain;
 class GameArea;
 class GameModelManager;
+class HUDManager;
 struct CellData;
 struct CellAdress;
 
@@ -104,6 +105,7 @@ protected:
 	osg::ref_ptr<osg::Camera>							mHUDCamera;
 	std::map<std::string, osg::ref_ptr<osgText::Text>> mHUDTextElements;
 	osg::ref_ptr<osg::Geode> mTextNode;
+	boost::shared_ptr<nsGameCore::HUDManager>			mHUDManager;
 
 	
 };

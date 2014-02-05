@@ -16,11 +16,25 @@ nsGameCore::GameBuilding::getModelType() const
 	return GameModel::MT_BUILDING;
 }
 
-osg::Node* 
+osg::ref_ptr<osg::Node>
 nsGameCore::GameBuilding::getGraphicalModel()
 {
-	//TODO
-	return nullptr;
+	if (mGraphicalModel)
+	{
+		return mGraphicalModel;
+	}
+	osg::ref_ptr<osg::Node> node = mrGameModelManager.getModel(mModelTypeName);
+	if (!node)
+	{
+		throw std::runtime_error("Model not registered " + mModelTypeName);
+	}
+	osg::CopyOp::CopyFlags copy_flags = osg::CopyOp::SHALLOW_COPY;
+
+	copy_flags = copy_flags | osg::CopyOp::DEEP_COPY_NODES;
+	copy_flags = copy_flags | osg::CopyOp::DEEP_COPY_CALLBACKS;
+	mGraphicalModel = dynamic_cast<osg::Node*>(node->clone(copy_flags));
+
+	return mGraphicalModel;
 }
 
 void nsGameCore::GameModelManager::getRegisteredModelNames( std::vector<std::string>& model_names )
@@ -60,4 +74,12 @@ osg::ref_ptr<osg::Node> nsGameCore::GameModelManager::getModel( const std::strin
 		return (*iter).second;
 	}
 	return nullptr;
+}
+
+boost::shared_ptr<nsGameCore::GameModel> nsGameCore::GameModelManager::createGameModelInstance( const std::string& model_name )
+{
+	//TODO: use a factory
+	boost::shared_ptr<GameModel> game_model;
+	game_model = boost::shared_ptr<GameBuilding>(new GameBuilding(*this, model_name));
+	return game_model;
 }

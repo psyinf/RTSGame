@@ -68,6 +68,7 @@ TARGET_LINK_LIBRARIES(  GameApp ${QT_LIBRARIES}
 						optimized osg optimized osgGA optimized osgViewer optimized osgQt optimized osgDB optimized osgText optimized osgSim optimized osgUtil optimized osgParticle 
 						debug osgd debug osgGAd debug osgViewerd debug osgQtd debug osgDBd debug osgTextd debug osgSimd debug osgUtild debug osgParticled
 						debug osgTerraind optimized osgTerrain
+						debug osgWidgetd optimized osgWidget
 						debug RenderCommon_d.lib optimized RenderCommon.lib
 						debug RenderCore_d.lib optimized RenderCore.lib
 						debug common_d optimized common
