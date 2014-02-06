@@ -45,9 +45,10 @@ struct EditMode
 
 	std::string getSubMode() const;
 
-	void setModel(CellDataPtr& cell_data, const std::string& model_type  );
+	void setSubMode(const std::string& sub_mode_name);
 	
 	std::string nextSubMode();
+
 protected:
 	std::string mModeName;
 	std::string mSubModeName;
@@ -83,7 +84,7 @@ public:
 
 	void setCurrentEditMode(const EditMode& edit_mode);
 
-	
+	void setModeAndEditMode(const std::string& mode, const std::string& sub_mode );
 	
 	osg::Camera* getHUDCamera();
 

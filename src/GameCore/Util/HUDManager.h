@@ -3,6 +3,7 @@
 #include <osgWidget/Box>
 #include <osgWidget/Input>
 #include <osgWidget/ViewerEventHandlers>
+#include <boost/function.hpp>
 
 namespace nsGameCore{
 
@@ -10,13 +11,19 @@ class GameCore;
 
 struct ColorLabel: public osgWidget::Label 
 {
-    ColorLabel(const char* label);
+    ColorLabel(const std::string& label, const boost::function<void()>& button_pressed_callback);
+	
+	ColorLabel(const std::string& label);
+
+	void setup( const std::string& label );
 
     bool mousePush(double, double, const osgWidget::WindowManager*);
 
     bool mouseEnter(double, double, const osgWidget::WindowManager*);
 
     bool mouseLeave(double, double, const osgWidget::WindowManager*);
+protected:
+	boost::function<void()> mButtonPressedCallback;
 };
 
 class ColorLabelMenu: public ColorLabel 
@@ -24,7 +31,9 @@ class ColorLabelMenu: public ColorLabel
     osg::ref_ptr<osgWidget::Window> _window;
 
 public:
-    ColorLabelMenu(const char* label);
+    ColorLabelMenu(const std::string& label);
+
+	void addEntry(const std::string& text, boost::function<void()>& button_pressed );
 
     void managed(osgWidget::WindowManager* wm);
 
@@ -44,6 +53,8 @@ public:
 	~HUDManager();
 
 	void createSplashScreen();
+
+	ColorLabelMenu* getMenu();
 
 	void show(const std::string& name, bool on_off);
 protected:

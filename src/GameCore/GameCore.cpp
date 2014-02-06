@@ -8,6 +8,7 @@
 #include "Util/HUDManager.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/bind.hpp>
 #include <Core/StandardHandlers.h>
 #include <Common/CommonHelpers.h>
 
@@ -65,6 +66,13 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	//mHUDCamera->addChild(mTextNode);
 
 	mHUDManager = boost::shared_ptr<HUDManager>(new HUDManager(*this));
+	//
+	std::vector<std::string> buildings;
+	mModelManager->getRegisteredModelNames(buildings);
+	for (auto iter = buildings.begin(); iter != buildings.end(); ++iter)
+	{
+		mHUDManager->getMenu()->addEntry((*iter), boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Place", *iter)));
+	}
 }
 
 nsGameCore::GameCore::~GameCore()
@@ -170,6 +178,12 @@ void nsGameCore::GameCore::setCellData( const CellAdress& address, CellDataPtr c
 nsGameCore::GameModelManager& nsGameCore::GameCore::getModelManager()
 {
 	return *mModelManager;
+}
+
+void nsGameCore::GameCore::setModeAndEditMode( const std::string& mode, const std::string& sub_mode )
+{
+	mCurrentEditMode.setMode(mode);
+	mCurrentEditMode.setSubMode(sub_mode);
 }
 
 std::string nsGameCore::EditMode::getCurrentModeName() const
@@ -284,5 +298,14 @@ std::string nsGameCore::EditMode::nextSubMode()
 	}
 	return "";
 
+}
+
+void nsGameCore::EditMode::setSubMode( const std::string& sub_mode_name )
+{
+	if (hasSubMode(mModeName, sub_mode_name))
+	{
+		throw std::runtime_error("Invalid sub mode: " + sub_mode_name );
+	}
+	mSubModeName = sub_mode_name;
 }
 
