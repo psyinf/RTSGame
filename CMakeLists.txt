@@ -24,8 +24,7 @@ SET(CMAKE_DEBUG_POSTFIX "_d")
 add_subdirectory(src/GameCore)
 add_subdirectory(src/GameApp)
 #Install resources
-INSTALL(DIRECTORY data/levels DESTINATION bin/data)
-INSTALL(DIRECTORY data/models DESTINATION bin/data)
+INSTALL(DIRECTORY data DESTINATION bin)
 
 
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
