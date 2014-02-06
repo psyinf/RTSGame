@@ -140,6 +140,7 @@ void ViewerWidget::createContext()
 
 	osgGA::KeySwitchMatrixManipulator* keyswitchManipulator = new osgGA::KeySwitchMatrixManipulator;
 	keyswitchManipulator->addMatrixManipulator( '1', "Trackball", new osgGA::TrackballManipulator() );
+	mRenderCore->getViewerRef()->setCameraManipulator(keyswitchManipulator);
 	
 // 	try 
 // 	{
@@ -149,10 +150,10 @@ void ViewerWidget::createContext()
 // 	{
 // 		std::cerr << "Spacemouse not found\n" << std::endl;
 // 	}
-
+	
 
 	mRenderCore->setup();
-	mRenderCore->getViewerRef()->setCameraManipulator(keyswitchManipulator);
+
 
 
 

@@ -57,12 +57,12 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 
 	mCurrentEditMode.setMode("DEFAULT");
 	//Add top level HUD
-	mHUDCamera = nsRenderer::Helpers::createHUDCamera(1024,1024);
+	//mHUDCamera = nsRenderer::Helpers::createHUDCamera(1024,1024);
 	
 	mrCore.getMainRoot()->addChild(mHUDCamera);
 	nsRenderer::CamResizeHandler* cam_resize_handler = new nsRenderer::CamResizeHandler(mHUDCamera);
 	mrCore.addEventHandler(cam_resize_handler);
-	mHUDCamera->addChild(mTextNode);
+	//mHUDCamera->addChild(mTextNode);
 
 	mHUDManager = boost::shared_ptr<HUDManager>(new HUDManager(*this));
 }

@@ -248,14 +248,17 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 			{
 				osgText::Text* txt = mrGameCore.getNamedTextObject("CurrentMode");
 				txt->setText(mrGameCore.getCurrentEditMode().nextMode());
+				return true;
 			}
 			if (ea.getKey()=='v')
 			{
 				osgText::Text* sub_txt = mrGameCore.getNamedTextObject("CurrentSubMode");
 				sub_txt->setText(mrGameCore.getCurrentEditMode().nextSubMode());
+				return true;
 			}
+			return false;
 
-			return true;
+			
 		}
 	default:
 		break;
@@ -273,12 +276,12 @@ nsGameCore::PickHandler::PickHandler(nsGameCore::GameCore& game_core)
 	,mrGameCore(game_core)
 {
 	osgText::Text* text_node = new osgText::Text();
-	text_node->setFont("fonts/arial.ttf");
+	text_node->setFont("./fonts/arial.ttf");
 	text_node->setPosition(osg::Vec3(20.0,500,0.0));
 	mrGameCore.createNamedTextObject("CurrentMode", text_node);
 
 	osgText::Text* sub_text_node = new osgText::Text();
-	sub_text_node->setFont("fonts/arial.ttf");
+	sub_text_node->setFont("./fonts/arial.ttf");
 	sub_text_node->setPosition(osg::Vec3(20.0,600,0.0));
 	mrGameCore.createNamedTextObject("CurrentSubMode", sub_text_node);
 

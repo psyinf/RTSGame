@@ -6,53 +6,49 @@
 
 namespace nsGameCore{
 
+class GameCore;
+
+struct ColorLabel: public osgWidget::Label 
+{
+    ColorLabel(const char* label);
+
+    bool mousePush(double, double, const osgWidget::WindowManager*);
+
+    bool mouseEnter(double, double, const osgWidget::WindowManager*);
+
+    bool mouseLeave(double, double, const osgWidget::WindowManager*);
+};
+
+class ColorLabelMenu: public ColorLabel 
+{
+    osg::ref_ptr<osgWidget::Window> _window;
+
+public:
+    ColorLabelMenu(const char* label);
+
+    void managed(osgWidget::WindowManager* wm);
+
+    void positioned();
+
+    bool mousePush(double, double, const osgWidget::WindowManager*);
+
+    bool mouseLeave(double, double, const osgWidget::WindowManager*);
+};
+
 
 class HUDManager
 {
 public:
-	HUDManager(GameCore& game_core)
-		:mrGameCore(game_core)
-	{
-		osgViewer::Viewer* viewer = game_core.getRenderCore().getViewerRef();
-		mWindowManager = new osgWidget::WindowManager(
-			viewer,
-			1280.0f,
-			1024.0f,
-			0xf0000000,
-			osgWidget::WindowManager::WM_PICK_DEBUG);
+	HUDManager(GameCore& game_core);
 
-		osgWidget::Box*   box   = new osgWidget::Box("vbox", osgWidget::Box::VERTICAL);
-		osgWidget::Input* input = new osgWidget::Input("input", "", 50);
+	~HUDManager();
 
-		input->setFont("fonts/VeraMono.ttf");
-		input->setFontColor(0.0f, 0.0f, 0.0f, 1.0f);
-		input->setFontSize(15);
-		input->setYOffset(input->calculateBestYOffset("y"));
-		input->setSize(400.0f, input->getText()->getCharacterHeight());
+	void createSplashScreen();
 
-		box->addWidget(input);
-		box->setOrigin(200.0f, 200.0f);
-		osg::Camera* camera = mWindowManager->createParentOrthoCamera();
-
-		viewer->addEventHandler(new osgWidget::MouseHandler(mWindowManager));
-		viewer->addEventHandler(new osgWidget::KeyboardHandler(mWindowManager));
-		viewer->addEventHandler(new osgWidget::ResizeHandler(mWindowManager, camera));
-		viewer->addEventHandler(new osgWidget::CameraSwitchHandler(mWindowManager, camera));
-		//viewer.addEventHandler(new osgViewer::WindowSizeHandler());
-
-		mWindowManager->addChild(box);
-		mWindowManager->resizeAllWindows();
-		//TODO: This fucks up the scene and camera management. 
-		mrGameCore.getRenderCore().getMainRoot()->addChild(camera);
-	}
-
-	~HUDManager()
-	{}
-
-	//TODO: use osgWidget?
-
-
+	void show(const std::string& name, bool on_off);
 protected:
+	std::map<std::string, osg::ref_ptr<osgWidget::Widget>> mNamedWidgets;
+	osg::ref_ptr<osgWidget::Box> mMainBox;
 	GameCore& mrGameCore;
 	osg::ref_ptr<osgWidget::WindowManager> mWindowManager;
 };
