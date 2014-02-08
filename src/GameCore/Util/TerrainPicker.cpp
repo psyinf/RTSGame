@@ -112,7 +112,6 @@ void nsGameCore::PickHandler::highlightSelected()
 		else
 		{
 			setSelectionColor(osg::Vec4(0,1,0,0.5));
-							
 		}
 				
 	}

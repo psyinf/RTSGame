@@ -7,6 +7,8 @@
 #include "Util/GameModels.h"
 #include "Util/HUDManager.h"
 
+#include "GameLogic.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
 #include <Core/StandardHandlers.h>
@@ -17,6 +19,7 @@
 nsGameCore::GameCore::GameCore( nsRenderer::Core& render_core ) 
 	:mrCore(render_core)
 	,mTextNode(new osg::Geode)
+	
 {
 
 }
@@ -28,12 +31,17 @@ nsRenderer::Core& nsGameCore::GameCore::getRenderCore()
 
 void nsGameCore::GameCore::frame()
 {
+	if (mGameLogic)
+	{
+		mGameLogic->frame();	
+	}
 	
 }
 
 void nsGameCore::GameCore::setup( const std::string& configuration )
 {
 	//TEST
+	
 	mTerrain.reset(new nsGameCore::Terrain(*this));
 	mTerrain->load("./data/levels/Channelled land.tif" );
 	mrCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
@@ -78,7 +86,10 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mHUDManager->getMenu("Terrain")->addEntry("Lower", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Down")));
 	mHUDManager->getMenu("Terrain")->addEntry("Level", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Level")));
 	
+	mHUDManager->addNameValueLabel("Funds");
+	mHUDManager->getNameValueLabel("Funds")->setLabelValue("1000 C$");
 
+	mGameLogic.reset(new GameLogic(*this));
 
 }
 
@@ -316,5 +327,28 @@ void nsGameCore::EditMode::setSubMode( const std::string& sub_mode_name )
 		throw std::runtime_error("Invalid sub mode: " + sub_mode_name );
 	}
 	mSubModeName = sub_mode_name;
+}
+
+nsGameCore::NamedValue& nsGameCore::GameCore::getNamedValue( const std::string& name )
+{
+	if (mNamedValues.count(name))
+	{
+		return mNamedValues[name];
+	}
+	throw (std::runtime_error("Unknown Named Value: " + name));
+}
+
+nsGameCore::NamedValue& nsGameCore::GameCore::addNamedValue( const std::string& name, const nsGameCore::NamedValue::ValueType& value_type )
+{
+	if (!mNamedValues.count(name))
+	{
+		mNamedValues[name] = NamedValue(name, value_type);
+		return mNamedValues[name];
+	}
+}
+
+boost::shared_ptr<nsGameCore::HUDManager> nsGameCore::GameCore::getHUDManager()
+{
+	return mHUDManager;
 }
 
