@@ -9,6 +9,7 @@ namespace nsGameCore{
 
 class Terrain;
 class GameCore;
+class GameModel;
 
 
 struct CellAdress
@@ -53,8 +54,14 @@ struct CellAdress
 
 struct CellData
 {
-	CellAdress address;
+	CellData(const CellAdress& cell_address, boost::shared_ptr<GameModel>& model_instance)
+		:address(cell_address)
+		,model_instance(model_instance)
+	{
 
+	}
+	CellAdress address;
+	boost::shared_ptr<GameModel> model_instance;
 };
 
 typedef boost::shared_ptr<CellData> CellDataPtr;

@@ -3,12 +3,12 @@
 #include <GameCore/GameArea.h>
 #include "TerrainTechniques.h"
 #include <Core/Core.h>
-
+#include "GameModels.h"
 
 #include <osgTerrain/Terrain>
 #include <osg/PolygonOffset>
 
-void nsGameCore::PickHandler::moveTerrain( osgViewer::View* view, const osgGA::GUIEventAdapter& ea )
+void nsGameCore::PickHandler::moveTerrain( osgViewer::View* view, const osgGA::GUIEventAdapter& ea, float diff )
 {
 	osgUtil::LineSegmentIntersector::Intersections intersections;
 
@@ -31,15 +31,7 @@ void nsGameCore::PickHandler::moveTerrain( osgViewer::View* view, const osgGA::G
 						osgTerrain::Locator* locator = terrain_tile->getElevationLayer()->getLocator();
 						if (locator)
 						{
-							double height_diff = 0.0;
-							if ("TERRAIN_UP" == mrGameCore.getCurrentEditMode().getCurrentModeName())
-							{
-								height_diff= 0.5;
-							}
-							else if ("TERRAIN_DOWN" == mrGameCore.getCurrentEditMode().getCurrentModeName())
-							{
-								height_diff=-0.5;
-							}
+							double height_diff = diff;
 							locator->convertModelToLocal((*hitr).getWorldIntersectPoint(),local_position);
 							double height = 0.0;
 							mod_technique->getHeight(local_position[0], local_position[1], height);	 
@@ -86,12 +78,13 @@ void nsGameCore::PickHandler::placeModel( osgViewer::View* view, const osgGA::GU
 					}
 					else
 					{
-						mrGameCore.setCellData(address, boost::shared_ptr<nsGameCore::CellData>(new nsGameCore::CellData()));
+						
 						address.print();
 						//
 						local = getClampedPosition(local, terrain_tile->getElevationLayer()->getNumColumns(), terrain_tile->getElevationLayer()->getNumColumns());
 						locator->convertLocalToModel(local, local);
-						mrGameCore.placeModel(local, osg::Quat(), osg::Vec3d(15,15,15), mrGameCore.getCurrentEditMode().getSubMode());
+						boost::shared_ptr<GameModel> model_instance = mrGameCore.placeModel(local, osg::Quat(), osg::Vec3d(15,15,15), mrGameCore.getCurrentEditMode().getSubMode());
+						mrGameCore.setCellData(address, boost::shared_ptr<nsGameCore::CellData>(new nsGameCore::CellData(address, model_instance)));
 						return;
 					}
 					
@@ -109,8 +102,11 @@ void nsGameCore::PickHandler::highlightSelected()
 	if ("PLACE" == mrGameCore.getCurrentEditMode().getCurrentModeName())
 	{
 		nsGameCore::CellAdress cell_address = getCellAdress(mCurrentPickInfo.mTerrainTile, mCurrentPickInfo.mIntersection.getWorldIntersectPoint());
-		if (mrGameCore.getCellData(cell_address))
+		nsGameCore::CellDataPtr cell_data_ptr = mrGameCore.getCellData(cell_address); 
+		if (cell_data_ptr)
 		{
+			//cell_data_ptr->model_instance->
+			std::string model_type_name = cell_data_ptr->model_instance->getModelTypeName();
 			setSelectionColor(osg::Vec4(1,0,0,0.5));
 		}
 		else
@@ -167,7 +163,8 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	bool is_active = (ea. getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_SHIFT);
 	bool is_terrain_mode = is_active && boost::istarts_with(mrGameCore.getCurrentEditMode().getCurrentModeName(),"TERRAIN");
 	bool is_place_mode = is_active && boost::istarts_with(mrGameCore.getCurrentEditMode().getCurrentModeName(),"PLACE");
-	bool is_level_terrain = is_active && boost::iequals(mrGameCore.getCurrentEditMode().getCurrentModeName(),"LEVEL_TERRAIN");
+	std::string sub_edit_mode = mrGameCore.getCurrentEditMode().getSubMode();
+	//bool is_level_terrain = is_active && boost::iequals(mrGameCore.getCurrentEditMode().getCurrentModeName(),"LEVEL_TERRAIN");
 	osgText::Text* text = mrGameCore.getNamedTextObject("CurrentMode");
 	osgText::Text* text_sub = mrGameCore.getNamedTextObject("CurrentSubMode");
 	text->setColor(is_active ? osg::Vec4(1,1,1,1) : osg::Vec4(1,1,1,0.2));
@@ -193,29 +190,33 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 			if (ea.getButtonMask() & osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
 			{
 				mLeftMousePressed = true;
-				std::cout << "left down" << std::endl;
 			}
 			if (ea.getButtonMask() & osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON)
 			{
 				mRightMousePressed = true;
-				std::cout << "right down" << std::endl;
 			}
 			if (is_terrain_mode)
 			{
-				moveTerrain(view,ea);
-				std::cout << "moving";
-				treat_as_handled = true;
+				bool up = boost::iequals("UP",sub_edit_mode);
+				bool down = boost::iequals("DOWN",sub_edit_mode);
+				bool level = boost::iequals("LEVEL",sub_edit_mode);
+				if ( up || down)
+				{
+					moveTerrain(view,ea, up ? 0.5 : -0.5 );
+					treat_as_handled = true;
+				}
+				else if (level)
+				{
+					pickTerrain(view, ea);
+					treat_as_handled = true;
+				}
 			}
 			else if (is_place_mode)
 			{
 				placeModel(view, ea);
 				treat_as_handled = true;
 			}
-			else if (is_level_terrain)
-			{
-				pickTerrain(view, ea);
-				treat_as_handled = true;
-			}
+			
 
 		}
 		break;
@@ -237,8 +238,19 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 		{
 			if (is_terrain_mode)
 			{
-				moveTerrain(view,ea);
-				treat_as_handled = true;
+				bool up = boost::iequals("UP",sub_edit_mode);
+				bool down = boost::iequals("DOWN",sub_edit_mode);
+				bool level = boost::iequals("LEVEL",sub_edit_mode);
+				if ( up || down)
+				{
+					moveTerrain(view,ea, up ? 0.5 : -0.5);
+					treat_as_handled = true;
+				}
+				else if (level)
+				{
+					pickTerrain(view, ea);
+					treat_as_handled = true;
+				}
 			}
 		}
 		break;

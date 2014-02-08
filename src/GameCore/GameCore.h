@@ -19,6 +19,7 @@ namespace nsGameCore{
 class Terrain;
 class GameArea;
 class GameModelManager;
+class GameModel;
 class HUDManager;
 struct CellData;
 struct CellAdress;
@@ -66,7 +67,7 @@ public:
 
 	void frame();
 
-	void placeModel(osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale, const std::string& model_type);
+	boost::shared_ptr<GameModel> placeModel(osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale, const std::string& model_type);
 
 	CellDataPtr getCellData(const CellAdress& address);
 

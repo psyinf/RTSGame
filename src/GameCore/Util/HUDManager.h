@@ -9,11 +9,11 @@ namespace nsGameCore{
 
 class GameCore;
 
-struct ColorLabel: public osgWidget::Label 
+struct NamedLabel: public osgWidget::Label 
 {
-    ColorLabel(const std::string& label, const boost::function<void()>& button_pressed_callback);
+    NamedLabel(const std::string& label, const boost::function<void()>& button_pressed_callback);
 	
-	ColorLabel(const std::string& label);
+	NamedLabel(const std::string& label);
 
 	void setup( const std::string& label );
 
@@ -26,12 +26,12 @@ protected:
 	boost::function<void()> mButtonPressedCallback;
 };
 
-class ColorLabelMenu: public ColorLabel 
+class LabelMenu: public NamedLabel 
 {
     osg::ref_ptr<osgWidget::Window> _window;
 
 public:
-    ColorLabelMenu(const std::string& label);
+    LabelMenu(const std::string& label);
 
 	void addEntry(const std::string& text, boost::function<void()>& button_pressed );
 
@@ -54,7 +54,9 @@ public:
 
 	void createSplashScreen();
 
-	ColorLabelMenu* getMenu();
+	LabelMenu* getMenu(const std::string& menu_name);
+	
+	void addMenu(const std::string& menu_name);
 
 	void show(const std::string& name, bool on_off);
 protected:

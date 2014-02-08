@@ -83,3 +83,8 @@ boost::shared_ptr<nsGameCore::GameModel> nsGameCore::GameModelManager::createGam
 	game_model = boost::shared_ptr<GameBuilding>(new GameBuilding(*this, model_name));
 	return game_model;
 }
+
+std::string nsGameCore::GameModel::getModelTypeName() const
+{
+	return mModelTypeName;
+}

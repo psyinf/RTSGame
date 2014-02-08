@@ -4,28 +4,28 @@
 #include "Common/Config.h"
 #include "Core/Core.h"
 
-bool nsGameCore::ColorLabel::mouseLeave( double, double, const osgWidget::WindowManager* )
+bool nsGameCore::NamedLabel::mouseLeave( double, double, const osgWidget::WindowManager* )
 {
 	setColor(0.0f, 0.0f, 0.3f, 0.4f);
 	
 	return true;
 }
 
-bool nsGameCore::ColorLabel::mouseEnter( double, double, const osgWidget::WindowManager* )
+bool nsGameCore::NamedLabel::mouseEnter( double, double, const osgWidget::WindowManager* )
 {
 	setColor(0.0f, 0.6f, 0.3f, 0.4f);
 
 	return true;
 }
 
-bool nsGameCore::ColorLabel::mousePush( double, double, const osgWidget::WindowManager* )
+bool nsGameCore::NamedLabel::mousePush( double, double, const osgWidget::WindowManager* )
 {
 	getParent()->hide();
 	mButtonPressedCallback();
 	return true;
 }
 
-nsGameCore::ColorLabel::ColorLabel( const std::string& label,  const boost::function<void()>&  button_press_callback ) 
+nsGameCore::NamedLabel::NamedLabel( const std::string& label,  const boost::function<void()>&  button_press_callback ) 
 	:osgWidget::Label("", "")
 	,mButtonPressedCallback(button_press_callback)
 
@@ -35,14 +35,14 @@ nsGameCore::ColorLabel::ColorLabel( const std::string& label,  const boost::func
 	
 }
 
-nsGameCore::ColorLabel::ColorLabel( const std::string& label) 
+nsGameCore::NamedLabel::NamedLabel( const std::string& label) 
 	:osgWidget::Label("", "")
 {
 	setup(label);
 
 }
 
-void nsGameCore::ColorLabel::setup( const std::string& label )
+void nsGameCore::NamedLabel::setup( const std::string& label )
 {
 	setImage("./data/ui/textures/theme-1.png", true);
 	setFont("./data/fonts/Vera.ttf");
@@ -50,19 +50,20 @@ void nsGameCore::ColorLabel::setup( const std::string& label )
 	setFontColor(1.0f, 1.0f, 1.0f, 1.0f);
 	setColor(0.0f, 0.0f, 0.3f, 0.4f);
 	addHeight(28.0f);
+	addWidth(150.0);
 	setCanFill(true);
 	setLabel(label);
 	setEventMask(osgWidget::EVENT_MOUSE_PUSH | osgWidget::EVENT_MASK_MOUSE_MOVE);
 }
 
-bool nsGameCore::ColorLabelMenu::mouseLeave( double, double, const osgWidget::WindowManager* )
+bool nsGameCore::LabelMenu::mouseLeave( double, double, const osgWidget::WindowManager* )
 {
 	if(!_window->isVisible()) setColor(0.8f, 0.8f, 0.8f, 0.1f);
 
 	return true;
 }
 
-bool nsGameCore::ColorLabelMenu::mousePush( double, double, const osgWidget::WindowManager* )
+bool nsGameCore::LabelMenu::mousePush( double, double, const osgWidget::WindowManager* )
 {
 	if(!_window->isVisible()) _window->show();
 
@@ -71,7 +72,7 @@ bool nsGameCore::ColorLabelMenu::mousePush( double, double, const osgWidget::Win
 	return true;
 }
 
-void nsGameCore::ColorLabelMenu::positioned()
+void nsGameCore::LabelMenu::positioned()
 {
 	osgWidget::Label::positioned();
 
@@ -79,7 +80,7 @@ void nsGameCore::ColorLabelMenu::positioned()
 	_window->resize(getWidth());
 }
 
-void nsGameCore::ColorLabelMenu::managed( osgWidget::WindowManager* wm )
+void nsGameCore::LabelMenu::managed( osgWidget::WindowManager* wm )
 {
 	osgWidget::Label::managed(wm);
 
@@ -88,8 +89,8 @@ void nsGameCore::ColorLabelMenu::managed( osgWidget::WindowManager* wm )
 	_window->hide();
 }
 
-nsGameCore::ColorLabelMenu::ColorLabelMenu( const std::string&  label ) 
-	:ColorLabel(label)
+nsGameCore::LabelMenu::LabelMenu( const std::string&  label ) 
+	:NamedLabel(label)
 {
 	_window = new osgWidget::Box(
 		std::string("Menu_") + label,
@@ -97,11 +98,6 @@ nsGameCore::ColorLabelMenu::ColorLabelMenu( const std::string&  label )
 		true
 		);
 
-	/*_window->addWidget(new ColorLabel("Open Some Stuff"));
-	_window->addWidget(new ColorLabel("Do It Now"));
-	_window->addWidget(new ColorLabel("Hello, How Are U?"));
-	_window->addWidget(new ColorLabel("Hmmm..."));
-	_window->addWidget(new ColorLabel("Option 5"));*/
 	_window->getBackground()->setColor(0,0,0,0);
 	setFont("./data/fonts/Vera.ttf");
 	_window->resize();
@@ -109,10 +105,12 @@ nsGameCore::ColorLabelMenu::ColorLabelMenu( const std::string&  label )
 	//setColor(0.8f, 0.8f, 0.8f, 0.1f);
 }
 
-void nsGameCore::ColorLabelMenu::addEntry( const std::string& text, boost::function<void()>& button_pressed )
+void nsGameCore::LabelMenu::addEntry( const std::string& text, boost::function<void()>& button_pressed )
 {
-	_window->addWidget(new ColorLabel(text, button_pressed));
+	_window->addWidget(new NamedLabel(text, button_pressed));
+	_window->show();
 	_window->resize();
+	_window->hide();
 }
 
 void nsGameCore::HUDManager::show( const std::string& name, bool on_off )
@@ -173,16 +171,27 @@ nsGameCore::HUDManager::HUDManager( GameCore& game_core ) :mrGameCore(game_core)
 	mMainBox->getBackground()->setColor(0.0,0.0,0.0,0.0);
 	//mMainBox->getBackground()->setImage("./data/ui/textures/theme-2.png", true);
 	//createSplashScreen();
-	
-	osg::ref_ptr<ColorLabelMenu> place_menu = new ColorLabelMenu("Buildings");
-	mMainBox->addWidget(place_menu);
-	mNamedWidgets.insert(std::make_pair("Buildings", place_menu));
 	mWindowManager->resizeAllWindows();
 	//TODO: This fucks up the scene and camera management. 
 	mrGameCore.getRenderCore().getMainRoot()->addChild(camera);
 }
 
-nsGameCore::ColorLabelMenu* nsGameCore::HUDManager::getMenu()
+nsGameCore::LabelMenu* nsGameCore::HUDManager::getMenu(const std::string& menu_name)
 {
-	return dynamic_cast<nsGameCore::ColorLabelMenu*>(mNamedWidgets["Buildings"].get());
+	if (mNamedWidgets.count(menu_name))
+	{
+		return dynamic_cast<nsGameCore::LabelMenu*>(mNamedWidgets[menu_name].get());
+	}
+	return 0;
+	
+}
+
+void nsGameCore::HUDManager::addMenu( const std::string& menu_name )
+{
+	if (!mNamedWidgets.count(menu_name))
+	{
+		osg::ref_ptr<osgWidget::Label> label =  new LabelMenu(menu_name);
+		mNamedWidgets[menu_name] = label;
+		mMainBox->addWidget(label);
+	}
 }

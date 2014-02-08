@@ -44,10 +44,8 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 
 
 	mCurrentEditMode.addRegisteredMode("DEFAULT");
-	mCurrentEditMode.addRegisteredMode("TERRAIN_UP");
-	mCurrentEditMode.addRegisteredMode("TERRAIN_DOWN");
 	mCurrentEditMode.addRegisteredMode("PLACE");
-	mCurrentEditMode.addRegisteredMode("LEVEL_TERRAIN");
+	mCurrentEditMode.addRegisteredMode("TERRAIN");
 	
 	std::vector<std::string> model_names;
 	mModelManager->getRegisteredModelNames(model_names);
@@ -69,10 +67,19 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	//
 	std::vector<std::string> buildings;
 	mModelManager->getRegisteredModelNames(buildings);
+	mHUDManager->addMenu("Buildings");
+	mHUDManager->addMenu("Terrain");
+
 	for (auto iter = buildings.begin(); iter != buildings.end(); ++iter)
 	{
-		mHUDManager->getMenu()->addEntry((*iter), boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Place", *iter)));
+		mHUDManager->getMenu("Buildings")->addEntry((*iter), boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Place", *iter)));
 	}
+	mHUDManager->getMenu("Terrain")->addEntry("Raise", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Up")));
+	mHUDManager->getMenu("Terrain")->addEntry("Lower", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Down")));
+	mHUDManager->getMenu("Terrain")->addEntry("Level", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Level")));
+	
+
+
 }
 
 nsGameCore::GameCore::~GameCore()
@@ -124,7 +131,8 @@ void nsGameCore::GameCore::createNamedTextObject( const std::string& text_elem_n
 	
 }
 
-void nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale,  const std::string& model_type )
+boost::shared_ptr<nsGameCore::GameModel> 
+nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale,  const std::string& model_type )
 {
 	try 
 	{
@@ -132,7 +140,7 @@ void nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientat
 		if (!game_model)
 		{
 			//TODO: bark here
-			return;
+			return boost::shared_ptr<GameModel>();
 		}
 		osg::PositionAttitudeTransform* pat = new osg::PositionAttitudeTransform();
 		pat->setPosition(position);
@@ -141,6 +149,7 @@ void nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientat
 		pat->addChild(game_model->getGraphicalModel());
 		pat->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON); 
 		mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
+		return game_model;
 	}
 	catch (const std::exception& e)
 	{

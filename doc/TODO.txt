@@ -1,0 +1,7 @@
+-Model information on hovering 
+-Minimap 
+	- different view modes
+		- Buildings
+		- Terrain (slope?)
+		- resources
+		- terrain/underground

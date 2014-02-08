@@ -43,7 +43,7 @@ public:
 
 	void levelTerrain(const osgUtil::LineSegmentIntersector::Intersection& intersection, osgTerrain::TerrainTile* terrain_tile );
 
-	void moveTerrain(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
+	void moveTerrain(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, float diff);
 	void placeModel(osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
 
 	void highlightSelected();

@@ -45,6 +45,8 @@ public:
 	virtual ~GameModel() {}
 
 	virtual osg::ref_ptr<osg::Node> getGraphicalModel() = 0;
+
+	std::string getModelTypeName() const;
 protected:
 	GameModelManager&		mrGameModelManager;	
 	std::string				mModelTypeName;
