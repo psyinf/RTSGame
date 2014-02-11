@@ -12,5 +12,6 @@ public:
 	virtual void frame();
 protected:
 	GameCore& mrGameCore;
+	unsigned int mFrameNumber;
 };
 }

@@ -28,6 +28,8 @@ class GameLogic;
 
 typedef boost::shared_ptr<CellData> CellDataPtr;
 
+
+
 struct NamedValue
 {
 	enum ValueType 
@@ -78,14 +80,36 @@ struct NamedValue
 	{
 		return value;
 	}
+
 protected:
 	std::string name;
 	std::string value;
 	ValueType type;
+};
 
+template <class T>
+class ScopedNamedValue
+{
+public:
+	ScopedNamedValue(NamedValue& named_value)
+		:mrNamedValue(named_value)
+		,mValue(named_value.getValue<T>())
+	{
 
+	}
 
+	~ScopedNamedValue()
+	{
+		mrNamedValue.setValue<T>(mValue);
+	}
 
+	T& getValueRef()
+	{
+		return mValue;
+	}
+protected:
+	T mValue;
+	NamedValue& mrNamedValue;
 };
 
 struct EditMode
@@ -157,10 +181,14 @@ public:
 	void createNamedTextObject(const std::string&, osg::ref_ptr<osgText::Text> text_node );
 
 	CellAdress calculateCellAdress(float x, float y, unsigned int level = 0);
+	
 	NamedValue& getNamedValue(const std::string& name);
 
 	nsGameCore::NamedValue& addNamedValue(const std::string& name, const NamedValue::ValueType& value_type );
+	
 	boost::shared_ptr<nsGameCore::HUDManager> getHUDManager();
+
+	boost::shared_ptr<nsGameCore::GameArea>	getGameArea();
 protected:
 	EditMode											mCurrentEditMode;
 	nsRenderer::Core&									mrCore;

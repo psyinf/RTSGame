@@ -86,9 +86,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mHUDManager->getMenu("Terrain")->addEntry("Lower", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Down")));
 	mHUDManager->getMenu("Terrain")->addEntry("Level", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Level")));
 	
-	mHUDManager->addNameValueLabel("Funds");
-	mHUDManager->getNameValueLabel("Funds")->setLabelValue("1000 C$");
-
+	
 	mGameLogic.reset(new GameLogic(*this));
 
 }
@@ -166,6 +164,7 @@ nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientation, 
 	{
 		std::cerr << e.what() << std::endl;
 	}
+	return boost::shared_ptr<GameModel>();
 }
 
 
@@ -345,10 +344,16 @@ nsGameCore::NamedValue& nsGameCore::GameCore::addNamedValue( const std::string& 
 		mNamedValues[name] = NamedValue(name, value_type);
 		return mNamedValues[name];
 	}
+	throw std::runtime_error("Unregistered NamedValue:" + name);
 }
 
 boost::shared_ptr<nsGameCore::HUDManager> nsGameCore::GameCore::getHUDManager()
 {
 	return mHUDManager;
+}
+
+boost::shared_ptr<nsGameCore::GameArea> nsGameCore::GameCore::getGameArea()
+{
+	return mGameArea;
 }
 

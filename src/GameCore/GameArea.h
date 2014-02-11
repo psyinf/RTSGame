@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <vector>
 
 #include <osg/Vec3i>
 #include <boost/unordered_map.hpp>
@@ -80,7 +81,7 @@ public:
 	
 	void setCellData(const CellAdress& cell_address, CellDataPtr cell_data);
 
-	
+	std::vector<CellDataPtr> getCellDatas() const;
 protected:
 
 	boost::unordered_map<CellAdress, CellDataPtr> mCellData;
