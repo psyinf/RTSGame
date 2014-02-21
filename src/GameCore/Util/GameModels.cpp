@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iterator>
 #include "Filesystem/Directory.h"
+#include "FileFormats/XMLSerializer.h"
 
 #include <osgDB/ReadFile>
 
@@ -45,7 +46,8 @@ std::string nsGameCore::GameBuilding::getProperty( const std::string& property_n
 	{
 		return (*iter).second;
 	}
-	throw std::runtime_error("Unknown Property: " + canonical_name);
+	return "";
+	//throw std::runtime_error("Unknown Property: " + canonical_name);
 }
 
 void nsGameCore::GameBuilding::setProperty( const std::string& property_name, const std::string& property_value )
@@ -93,7 +95,7 @@ std::vector<std::string> nsGameCore::GameBuilding::getSubPropertyNames( const st
 	{
 		std::vector<std::string> split_result;
 		boost::split(split_result, *iter, boost::is_any_of(":"));
-		if (split_result.size() >= 1)
+		if (split_result.size() >= 1 && !split_result[0].empty())
 		{
 			result_names.push_back(split_result[0]);
 		}
@@ -103,11 +105,12 @@ std::vector<std::string> nsGameCore::GameBuilding::getSubPropertyNames( const st
 
 void nsGameCore::GameModelManager::getRegisteredModelNames( std::vector<std::string>& model_names )
 {
-	std::transform(mRegisteredModels.begin(), 
+	/*std::for_each(mRegisteredModels.begin(), 
 		mRegisteredModels.end(), 
 		std::back_inserter(model_names),
-		boost::bind(&ModelNameMap::value_type::first, _1)
-		);
+		boost::bind(&ModelNames::value_type, _1)
+		);*/
+	model_names.assign(mKnownModels.begin(), mKnownModels.end());
 }
 
 nsGameCore::GameModelManager::~GameModelManager()
@@ -116,18 +119,35 @@ nsGameCore::GameModelManager::~GameModelManager()
 }
 
 nsGameCore::GameModelManager::GameModelManager( const std::string& path )
+	:mModelPath(path)
 {
+	
 	std::vector<std::string> ret_files;
-	Directory::getFilesInDir(path, ret_files, "*.obj" );
+	Directory::getFilesInDir(path, ret_files, "*.xml" );
 	for (auto iter = ret_files.begin(); iter != ret_files.end(); ++iter)
 	{
-		osg::ref_ptr<osg::Node> ret_node = osgDB::readNodeFile(path + "/" + (*iter));
-		if (ret_node)
-		{
-			mRegisteredModels.insert(std::make_pair(boost::to_upper_copy(Directory::getFileName((*iter), false)), ret_node));
-		}
+		mKnownModels.insert((*iter));
 	}
 
+}
+
+bool nsGameCore::GameModelManager::loadModel( const std::string& model_name, const std::string& model_path )
+{
+	osg::ref_ptr<osg::Node> ret_node = osgDB::readNodeFile(model_path);
+	if (ret_node)
+	{
+		mRegisteredModels.insert(std::make_pair(model_name, ret_node));
+		return true;
+	}
+	return false;
+}
+
+boost::shared_ptr<nsGameCore::GameModel> nsGameCore::GameModelManager::createGameModelInstance( const std::string& model_name )
+{
+	//TODO: use a factory
+	boost::shared_ptr<GameModel> game_model;
+	game_model = boost::shared_ptr<GameBuilding>(new GameBuilding(*this, mModelPath + "/" +model_name));
+	return game_model;
 }
 
 osg::ref_ptr<osg::Node> nsGameCore::GameModelManager::getModel( const std::string& model_name )
@@ -140,15 +160,25 @@ osg::ref_ptr<osg::Node> nsGameCore::GameModelManager::getModel( const std::strin
 	return nullptr;
 }
 
-boost::shared_ptr<nsGameCore::GameModel> nsGameCore::GameModelManager::createGameModelInstance( const std::string& model_name )
-{
-	//TODO: use a factory
-	boost::shared_ptr<GameModel> game_model;
-	game_model = boost::shared_ptr<GameBuilding>(new GameBuilding(*this, model_name));
-	return game_model;
-}
-
 std::string nsGameCore::GameModel::getModelTypeName() const
 {
 	return mModelTypeName;
+}
+
+void nsGameCore::GameBuilding::parse( const std::string& model_description_file )
+{
+	tinyxml2::XMLDocument document;
+	if (0 != document.LoadFile(model_description_file.c_str()))
+	{
+		throw std::runtime_error("Error in model xml:");
+	}
+	std::string model_path;
+	
+	nsXML::getValue(model_path, "GameBuilding/ModelName", document);
+	if (!mrGameModelManager.loadModel(mModelTypeName, model_path))
+	{
+		//TODO: report error
+	}
+
+
 }

@@ -44,31 +44,13 @@ void nsGameCore::GameLogic::frame()
 			nsGameCore::NamedValue& cm = mrGameCore.getNamedValue("CM");
 			
 			//credits.setValue(credits.getValue<int>() - 1);
-			std::vector<nsGameCore::CellDataPtr> cell_datas;
-			cell_datas = mrGameCore.getGameArea()->getCellDatas();
+			updateProduction();
+			updateCosts();
+			
 
-			for (auto iter = cell_datas.begin(); iter != cell_datas.end(); ++iter)
-			{
-				nsGameCore::CellDataPtr& cell_data = (*iter);
-				nsGameCore::GameBuilding* game_building = dynamic_cast<nsGameCore::GameBuilding*>(cell_data->model_instance.get());
-				if (!game_building)
-				{
-					continue;
-				}
-				std::string model_type = cell_data->model_instance->getModelTypeName();
-				//if (boost::iequals(model_type, "H3-Mine"))
-				{
-					 std::vector<std::string> produced_types = game_building->getSubPropertyNames("Production");
-					 for (auto p_iter = produced_types.begin(); p_iter != produced_types.end(); ++p_iter)
-					 {
-						nsGameCore::ScopedNamedValue<int>  value(mrGameCore.getNamedValue(*(p_iter)));
-						int production = game_building->getPropertySubValue<int>("Production", (*p_iter));
-						value.getValueRef() += production; 
-					 }
-				}
+			
 
-			}	
-
+			//update all labels
 			mrGameCore.getHUDManager()->getNameValueLabel("$")->setLabelValue(credits.getValueString());
 			mrGameCore.getHUDManager()->getNameValueLabel("Energy")->setLabelValue(energy.getValueString());
 			mrGameCore.getHUDManager()->getNameValueLabel("H3")->setLabelValue(helium.getValueString());
@@ -84,5 +66,77 @@ void nsGameCore::GameLogic::frame()
 		}
 	}
 	
+}
+
+void nsGameCore::GameLogic::updateProduction()
+{
+	std::vector<nsGameCore::CellDataPtr> cell_datas;
+	cell_datas = mrGameCore.getGameArea()->getCellDatas();
+
+	for (auto iter = cell_datas.begin(); iter != cell_datas.end(); ++iter)
+	{
+		nsGameCore::CellDataPtr& cell_data = (*iter);
+		nsGameCore::GameBuilding* game_building = dynamic_cast<nsGameCore::GameBuilding*>(cell_data->model_instance.get());
+		if (!game_building)
+		{
+			continue;
+		}
+		std::string model_type = cell_data->model_instance->getModelTypeName();
+		//if (boost::iequals(model_type, "H3-Mine"))
+		{
+			bool  can_produce(game_building->getPropertyValue<bool>("IsProducing"));
+			if (!can_produce)
+			{
+				//TODO: issue callback
+				continue;
+			}
+			std::vector<std::string> produced_types = game_building->getSubPropertyNames("Production");
+			for (auto p_iter = produced_types.begin(); p_iter != produced_types.end(); ++p_iter)
+			{
+				
+				nsGameCore::ScopedNamedValue<int>  value(mrGameCore.getNamedValue(*(p_iter)));
+				int production = game_building->getPropertySubValue<int>("Production", (*p_iter));
+				value.getValueRef() += production; 
+			}
+		}
+
+	}
+}
+
+void nsGameCore::GameLogic::updateCosts()
+{
+	std::vector<nsGameCore::CellDataPtr> cell_datas;
+	cell_datas = mrGameCore.getGameArea()->getCellDatas();
+
+	for (auto iter = cell_datas.begin(); iter != cell_datas.end(); ++iter)
+	{
+		nsGameCore::CellDataPtr& cell_data = (*iter);
+		nsGameCore::GameBuilding* game_building = dynamic_cast<nsGameCore::GameBuilding*>(cell_data->model_instance.get());
+		if (!game_building)
+		{
+			continue;
+		}
+		std::string model_type = cell_data->model_instance->getModelTypeName();
+		//if (boost::iequals(model_type, "H3-Mine"))
+		{
+			std::vector<std::string> produced_types = game_building->getSubPropertyNames("RunningCost");
+			for (auto p_iter = produced_types.begin(); p_iter != produced_types.end(); ++p_iter)
+			{
+				nsGameCore::ScopedNamedValue<int>  value(mrGameCore.getNamedValue(*(p_iter)));
+				int cost = game_building->getPropertySubValue<int>("RunningCost", (*p_iter));
+				value.getValueRef() -= cost; 
+				value.getValueRef() = std::max(0, value.getValueRef());
+				if (0 == value.getValueRef() )
+				{
+					game_building->setProperty("IsProducing", "false");
+				}
+				else
+				{
+					game_building->setProperty("IsProducing", "true");
+				}
+			}
+		}
+
+	}
 }
 

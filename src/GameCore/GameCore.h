@@ -37,6 +37,7 @@ struct NamedValue
 		VT_INTEGRAL,
 		VT_FLOAT,
 		VT_STRING,
+		VT_BOOL,
 	};
 
 
@@ -56,6 +57,9 @@ struct NamedValue
 			break;
 		case VT_FLOAT:
 			value = boost::lexical_cast<std::string>(0);
+			break;
+		case VT_BOOL:
+			value = boost::lexical_cast<std::string>(false);
 			break;
 		default: //fall through
 		case VT_STRING:
@@ -94,20 +98,31 @@ public:
 	ScopedNamedValue(NamedValue& named_value)
 		:mrNamedValue(named_value)
 		,mValue(named_value.getValue<T>())
+		,mPotentiallyChanged(false)
 	{
 
 	}
 
 	~ScopedNamedValue()
 	{
-		mrNamedValue.setValue<T>(mValue);
+		if (mPotentiallyChanged)
+		{
+			mrNamedValue.setValue<T>(mValue);
+		}
+	}
+
+	T getValue()
+	{
+		return mValue;
 	}
 
 	T& getValueRef()
 	{
+		mPotentiallyChanged = true;
 		return mValue;
 	}
 protected:
+	bool mPotentiallyChanged;
 	T mValue;
 	NamedValue& mrNamedValue;
 };
