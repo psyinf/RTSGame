@@ -106,7 +106,7 @@ void nsGameCore::PickHandler::highlightSelected()
 		if (cell_data_ptr)
 		{
 			//cell_data_ptr->model_instance->
-			std::string model_type_name = cell_data_ptr->model_instance->getModelTypeName();
+			std::string model_type_name = cell_data_ptr->model_instance->getModelDisplayName();
 			setSelectionColor(osg::Vec4(1,0,0,0.5));
 		}
 		else

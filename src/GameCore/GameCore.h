@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Util/Properties.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -220,6 +220,7 @@ protected:
 	boost::shared_ptr<nsGameCore::HUDManager>			mHUDManager;
 
 	std::map<std::string, NamedValue>				mNamedValues;
+	Properties										mProperties;
 
 	
 };

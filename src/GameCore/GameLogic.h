@@ -15,6 +15,8 @@ public:
 
 	void updateCosts();
 
+	void updateConstruction();
+
 protected:
 	GameCore& mrGameCore;
 	unsigned int mFrameNumber;
