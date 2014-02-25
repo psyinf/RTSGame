@@ -78,7 +78,11 @@ public:
 		}
 		
 	}
-
+	template <class T> 
+	void addProperty(const std::string& name, const std::string& value_name, const T& value)
+	{
+		addProperty(name, value_name + ":" + boost::lexical_cast<std::string>(value));
+	}
 	void addProperty(const std::string& name, const std::string& value_str)
 	{
 		std::string& current_value = mProperties[name];
@@ -130,6 +134,14 @@ public:
 	bool operator==(const T& v) const
 	{
 		return mValue == v;
+	}
+	T operator+=(const T& v)
+	{
+		return (mValue+=v);
+	}
+	std::string getString() const
+	{
+		return boost::lexical_cast<std::string>(mValue);
 	}
 protected:
 	Properties& mrProperties;

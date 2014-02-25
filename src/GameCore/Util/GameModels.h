@@ -9,6 +9,7 @@ namespace nsXML
 {
 	class XMLNode;
 };
+/*
 namespace boost {
 	template<> 
 	inline bool lexical_cast<bool, std::string>(const std::string& arg) 
@@ -18,8 +19,17 @@ namespace boost {
 		ss >> std::boolalpha >> b;
 		return b;
 	}
-}
 
+	template<>
+	std::string lexical_cast<std::string, bool>(const bool& b) 
+	{
+		std::ostringstream ss;
+		ss << std::boolalpha << b;
+		return ss.str();
+	}
+
+}
+*/
 namespace nsGameCore{
 class GameModel;
 

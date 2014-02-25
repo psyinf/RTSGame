@@ -357,3 +357,8 @@ boost::shared_ptr<nsGameCore::GameArea> nsGameCore::GameCore::getGameArea()
 	return mGameArea;
 }
 
+nsGameCore::Properties& nsGameCore::GameCore::getProperties()
+{
+	return mProperties;
+}
+

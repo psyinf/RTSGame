@@ -204,6 +204,8 @@ public:
 	boost::shared_ptr<nsGameCore::HUDManager> getHUDManager();
 
 	boost::shared_ptr<nsGameCore::GameArea>	getGameArea();
+
+	Properties& getProperties();
 protected:
 	EditMode											mCurrentEditMode;
 	nsRenderer::Core&									mrCore;
@@ -219,8 +221,8 @@ protected:
 	osg::ref_ptr<osg::Geode> mTextNode;
 	boost::shared_ptr<nsGameCore::HUDManager>			mHUDManager;
 
-	std::map<std::string, NamedValue>				mNamedValues;
-	Properties										mProperties;
+	std::map<std::string, NamedValue>					mNamedValues;
+	Properties											mProperties;
 
 	
 };

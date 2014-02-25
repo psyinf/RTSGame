@@ -11,6 +11,7 @@ nsGameCore::GameLogic::GameLogic( GameCore& game_core )
 	:mrGameCore(game_core)
 	,mFrameNumber(0)
 {
+	/*
 	//TODO: some functionality to bind valueName to display name
 	mrGameCore.addNamedValue("Credits", NamedValue::VT_INTEGRAL).setValue(1000);
 	mrGameCore.getHUDManager()->addNameValueLabel("$");
@@ -26,7 +27,32 @@ nsGameCore::GameLogic::GameLogic( GameCore& game_core )
 	mrGameCore.getHUDManager()->addNameValueLabel("Air");
 	mrGameCore.addNamedValue("CM", NamedValue::VT_INTEGRAL).setValue(1000);
 	mrGameCore.getHUDManager()->addNameValueLabel("CM");
+	*/
+	
+	registerGUIValue("Resources", "$", "Credits", 1000.0);
+	registerGUIValue("Resources", "E", "Energy", 1000.0);
+	registerGUIValue("Resources", "H3", "H3", 1000.0);
+	registerGUIValue("Resources", "Ores", "Ores", 1000.0);
+	registerGUIValue("Resources", "Water", "Water", 1000.0);
+	registerGUIValue("Resources", "Air", "Air", 1000.0);
+	registerGUIValue("Resources", "CM", "CM", 1000.0);
 }
+
+void nsGameCore::GameLogic::registerGUIValue( const std::string& category, const std::string& display_name, const std::string& property_name, int value )
+{
+	mrGameCore.getProperties().addProperty<float>(category, property_name, value );
+	mrGameCore.getHUDManager()->addNameValueLabel(display_name);
+	ValueRef<int> value_ref(mrGameCore.getProperties(), category, property_name);
+	value_ref = value;
+}
+
+
+void nsGameCore::GameLogic::updateGUIValue( const std::string& category, const std::string& property_name, const std::string& display_name )
+{
+	nsGameCore::ValueRef<int> credits_value(mrGameCore.getProperties(), category, property_name);
+	mrGameCore.getHUDManager()->getNameValueLabel(display_name)->setLabelValue(credits_value.getString());
+}
+
 
 void nsGameCore::GameLogic::frame()
 {
@@ -35,31 +61,20 @@ void nsGameCore::GameLogic::frame()
 	{
 		try 
 		{
-			nsGameCore::NamedValue& credits = mrGameCore.getNamedValue("Credits");
-			nsGameCore::NamedValue& energy = mrGameCore.getNamedValue("Energy");
-			nsGameCore::NamedValue& helium = mrGameCore.getNamedValue("H3");
-			nsGameCore::NamedValue& ores = mrGameCore.getNamedValue("Ores");
-			nsGameCore::NamedValue& air = mrGameCore.getNamedValue("Air");
-			nsGameCore::NamedValue& water = mrGameCore.getNamedValue("Water");
-			nsGameCore::NamedValue& cm = mrGameCore.getNamedValue("CM");
 			
-			//credits.setValue(credits.getValue<int>() - 1);
+
 			updateConstruction();
 			updateCosts();
 			updateProduction();
-
 			
-
 			
-
-			//update all labels
-			mrGameCore.getHUDManager()->getNameValueLabel("$")->setLabelValue(credits.getValueString());
-			mrGameCore.getHUDManager()->getNameValueLabel("Energy")->setLabelValue(energy.getValueString());
-			mrGameCore.getHUDManager()->getNameValueLabel("H3")->setLabelValue(helium.getValueString());
-			mrGameCore.getHUDManager()->getNameValueLabel("Ores")->setLabelValue(ores.getValueString());
-			mrGameCore.getHUDManager()->getNameValueLabel("Air")->setLabelValue(air.getValueString());
-			mrGameCore.getHUDManager()->getNameValueLabel("Water")->setLabelValue(water.getValueString());
-			mrGameCore.getHUDManager()->getNameValueLabel("CM")->setLabelValue(cm.getValueString());
+			updateGUIValue("Resources", "Credits", "$");
+			updateGUIValue("Resources", "Energy", "E");
+			updateGUIValue("Resources", "H3", "H3");
+			updateGUIValue("Resources", "Ores", "Ores");
+			updateGUIValue("Resources", "Air", "Air");
+			updateGUIValue("Resources", "Water", "Water");
+			updateGUIValue("Resources", "CM", "CM");
 
 		}
 		catch (const std::exception& e)
@@ -102,9 +117,9 @@ void nsGameCore::GameLogic::updateProduction()
 			for (auto p_iter = produced_types.begin(); p_iter != produced_types.end(); ++p_iter)
 			{
 				
-				nsGameCore::ScopedNamedValue<int>  value(mrGameCore.getNamedValue(*(p_iter)));
+				nsGameCore::ValueRef<int> value_ref(mrGameCore.getProperties(), "Resources", (*p_iter));
 				int production = game_building->getProperties().getPropertySubValue<int>("Production", (*p_iter));
-				value.getValueRef() += production; 
+				value_ref += production; 
 			}
 		}
 
@@ -132,18 +147,23 @@ void nsGameCore::GameLogic::updateCosts()
 			{
 				continue;
 			}
-			nsGameCore::ValueRef<bool> is_producing(game_building->getProperties(), "Status", "IsProducing");
+			//nsGameCore::ValueRef<bool> is_producing(game_building->getProperties(), "Status", "IsProducing");
 			std::vector<std::string> costs = game_building->getProperties().getSubPropertyNames("RunningCost");
 			for (auto p_iter = costs.begin(); p_iter != costs.end(); ++p_iter)
 			{
-				nsGameCore::ScopedNamedValue<int>  value(mrGameCore.getNamedValue(*(p_iter)));
+				//nsGameCore::ScopedNamedValue<int>  value(mrGameCore.getNamedValue(*(p_iter)));
 				int cost = game_building->getProperties().getPropertySubValue<int>("RunningCost", (*p_iter));
-				
-				value.getValueRef() -= cost; 
-				value.getValueRef() = std::max(0, value.getValueRef());
+				nsGameCore::ValueRef<int> value_ref(mrGameCore.getProperties(), "Resources", (*p_iter));
+				int production = game_building->getProperties().getPropertySubValue<int>("RunningCost", (*p_iter));
+				value_ref += -cost;
+				value_ref = std::max(0, value_ref.get());
 
 				nsGameCore::ValueRef<bool>  production_status(game_building->getProperties(), "Status", "IsProducing");
-				production_status = (0==value.getValueRef());
+				production_status = (0!=value_ref.get());
+				if (!production_status.get())
+				{
+					std::cout << "damn" << std::endl;
+				}
 			}
 		}
 
@@ -169,13 +189,15 @@ void nsGameCore::GameLogic::updateConstruction()
 			nsGameCore::ValueRef<float> construction_progress(game_building->getProperties(), "Status", "ConstructionFinished");
 			nsGameCore::ValueRef<float> construction_speed(game_building->getProperties(), "Status", "ConstructionSpeed");
 			nsGameCore::ValueRef<bool> is_producing(game_building->getProperties(), "Status", "IsProducing");
-			if (1.0 > construction_progress.get())
+			if (1.0 >= construction_progress.get())
 			{
 				//check resources
 				auto building_costs = game_building->getProperties().getSubPropertyNames("BuildingCost");
 				for (auto build_iter = building_costs.begin(); build_iter != building_costs.end(); ++build_iter)
 				{
-					//TODO: check resources needed for construction		
+					//TODO: decrease resources according to cost
+					//int cost = game_building->getProperties().getPropertySubValue<int>("BuildingCost", (*p_iter));
+
 				}
 				construction_progress.getRef() += construction_speed.get();
 				is_producing = false;

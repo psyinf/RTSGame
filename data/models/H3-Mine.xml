@@ -7,7 +7,7 @@
 		<RunningCost name = "Energy" value = "50"/>
 		<Production name = "H3" value = "50"/>
 		<Status name = "ProductionModifier" value = "1.0"/>
-		<Status name = "IsProducing" value = "true"/>
+		<Status name = "IsProducing" value = "1"/>
 		<Status name = "ConstructionFinished" value = "0.0"/>
 		<Status name = "ConstructionSpeed" value = "0.1"/>
 	</Properties>
