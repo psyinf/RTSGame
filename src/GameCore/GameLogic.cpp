@@ -193,19 +193,39 @@ void nsGameCore::GameLogic::updateConstruction()
 			{
 				//check resources
 				auto building_costs = game_building->getProperties().getSubPropertyNames("BuildingCost");
+				bool building_paused = false;
+				//check pre-conditions
 				for (auto build_iter = building_costs.begin(); build_iter != building_costs.end(); ++build_iter)
 				{
-					//TODO: decrease resources according to cost
-					//int cost = game_building->getProperties().getPropertySubValue<int>("BuildingCost", (*p_iter));
-
+					nsGameCore::ValueRef<int> value_ref(game_building->getProperties(), "BuildingCost", (*build_iter));
+					nsGameCore::ValueRef<int> res_value_ref(mrGameCore.getProperties(), "Resources", (*build_iter));
+					if ((value_ref.get() * construction_speed.get()) > res_value_ref.get())
+					{
+						building_paused = true;
+					}
 				}
-				construction_progress.getRef() += construction_speed.get();
+				if (!building_paused)
+				{
+					for (auto build_iter = building_costs.begin(); build_iter != building_costs.end(); ++build_iter)
+					{
+						nsGameCore::ValueRef<int> value_ref(game_building->getProperties(), "BuildingCost", (*build_iter));
+						nsGameCore::ValueRef<int> res_value_ref(mrGameCore.getProperties(), "Resources", (*build_iter));
+						res_value_ref -= value_ref.get() * construction_speed.get();
+					}
+					construction_progress.getRef() += construction_speed.get();
+					//TODO: move to model
+					game_building->getGraphicalModel()->getOrCreateStateSet()->getOrCreateUniform("ConstructionProgress", osg::Uniform::FLOAT)->set(construction_progress.get());
+				}
+			
+				
 				is_producing = false;
 			}
 			else
 			{
 				is_producing = true;
 			}
+			//TODO: move to model, this way we could create some icons 
+			game_building->getGraphicalModel()->getOrCreateStateSet()->getOrCreateUniform("ProductionPaused", osg::Uniform::BOOL)->set(!is_producing.get());
 		}
 		
 	}

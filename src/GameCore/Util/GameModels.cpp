@@ -11,7 +11,7 @@
 #include <osgDB/ReadFile>
 
 #include <boost/algorithm/string.hpp>
-
+#include <common/CustomShaderProgram.h>
 
 nsGameCore::GameModel::Type 
 nsGameCore::GameBuilding::getModelType() const
@@ -36,6 +36,9 @@ nsGameCore::GameBuilding::getGraphicalModel()
 	copy_flags = copy_flags | osg::CopyOp::DEEP_COPY_NODES;
 	copy_flags = copy_flags | osg::CopyOp::DEEP_COPY_CALLBACKS;
 	mGraphicalModel = dynamic_cast<osg::Node*>(node->clone(copy_flags));
+	mGraphicalModel->getOrCreateStateSet()->getOrCreateUniform("ConstructionProgress", osg::Uniform::FLOAT)->set(0.0f);
+	nsRenderer::CustomShaderProgram* program = nsRenderer::CustomShaderProgram::loadProgram("data/shaders/Building", nsRenderer::ShaderInfo());
+	mGraphicalModel->getOrCreateStateSet()->setAttribute(program, osg::StateAttribute::ON);
 
 	return mGraphicalModel;
 }

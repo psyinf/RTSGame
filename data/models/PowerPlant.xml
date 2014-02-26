@@ -1,0 +1,15 @@
+<GameBuilding>
+	<DisplayName>FusionReactor</DisplayName>
+	<ModelName>Factory.obj</ModelName>
+	<Properties>
+		<BuildingCost name = "CM" value = "750"/>
+		<BuildingCost name = "Energy" value = "100"/>
+		
+		<RunningCost name = "H3" value = "50"/>
+		<Production name = "Energy" value = "150"/>
+		<Status name = "ProductionModifier" value = "1.0"/>
+		<Status name = "IsProducing" value = "1"/>
+		<Status name = "ConstructionFinished" value = "0.0"/>
+		<Status name = "ConstructionSpeed" value = "0.05"/>
+	</Properties>
+</GameBuilding>

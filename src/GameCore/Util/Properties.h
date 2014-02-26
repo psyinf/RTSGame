@@ -139,9 +139,37 @@ public:
 	{
 		return (mValue+=v);
 	}
+	T operator-=(const T& v)
+	{
+		return (mValue-=v);
+	}
 	std::string getString() const
 	{
 		return boost::lexical_cast<std::string>(mValue);
+	}
+	bool operator>(const T& rhs)
+	{
+		return mValue > rhs;
+	}
+
+	bool operator<(const T& rhs)
+	{
+		return mValue < rhs;
+	}
+
+	bool operator>(const ValueRef& rhs)
+	{
+		return mValue > rhs.mValue;
+	}
+
+	bool operator<(const ValueRef& rhs)
+	{
+		return mValue < rhs.mValue;
+	}
+
+	bool operator==(const ValueRef& rhs)
+	{
+		return mValue == rhs.mValue;
 	}
 protected:
 	Properties& mrProperties;
