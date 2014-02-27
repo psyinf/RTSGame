@@ -83,8 +83,9 @@ void nsGameCore::PickHandler::placeModel( osgViewer::View* view, const osgGA::GU
 						//
 						local = getClampedPosition(local, terrain_tile->getElevationLayer()->getNumColumns(), terrain_tile->getElevationLayer()->getNumColumns());
 						locator->convertLocalToModel(local, local);
-						boost::shared_ptr<GameModel> model_instance = mrGameCore.placeModel(local, osg::Quat(), osg::Vec3d(15,15,15), mrGameCore.getCurrentEditMode().getSubMode());
-						mrGameCore.setCellData(address, boost::shared_ptr<nsGameCore::CellData>(new nsGameCore::CellData(address, model_instance)));
+						mrGameCore.placeModel(address,mrGameCore.getCurrentEditMode().getSubMode());
+					/*	boost::shared_ptr<GameModel> model_instance = mrGameCore.placeModel(local, osg::Quat(), osg::Vec3d(15,15,15), mrGameCore.getCurrentEditMode().getSubMode());
+						mrGameCore.setCellData(address, boost::shared_ptr<nsGameCore::CellData>(new nsGameCore::CellData(address, model_instance)));*/
 						return;
 					}
 					

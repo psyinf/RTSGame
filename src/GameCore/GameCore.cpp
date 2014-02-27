@@ -140,31 +140,25 @@ void nsGameCore::GameCore::createNamedTextObject( const std::string& text_elem_n
 	
 }
 
-boost::shared_ptr<nsGameCore::GameModel> 
-nsGameCore::GameCore::placeModel( osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale,  const std::string& model_type )
+
+void nsGameCore::GameCore::placeModel( const CellAdress& address, const std::string& model_type )
 {
-	try 
+	boost::shared_ptr<nsGameCore::GameModel> game_model = mModelManager->createGameModelInstance(model_type);
+	if (!game_model || !game_model->getGraphicalModel())
 	{
-		boost::shared_ptr<nsGameCore::GameModel> game_model = mModelManager->createGameModelInstance(model_type);
-		if (!game_model)
-		{
-			//TODO: bark here
-			return boost::shared_ptr<GameModel>();
-		}
-		osg::PositionAttitudeTransform* pat = new osg::PositionAttitudeTransform();
-		pat->setPosition(position);
-		pat->setAttitude(orientation);
-		pat->setScale(scale);
-		pat->addChild(game_model->getGraphicalModel());
-		pat->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON); 
-		mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
-		return game_model;
+		//TODO: bark here
+		return;
 	}
-	catch (const std::exception& e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
-	return boost::shared_ptr<GameModel>();
+	osg::PositionAttitudeTransform* pat = new osg::PositionAttitudeTransform();
+	pat->setPosition(osg::Vec3d(address.coords.x(),address.coords.y(),address.coords.z()) + game_model->getPlacementMatrix().getTrans());
+	pat->setAttitude(game_model->getPlacementMatrix().getRotate());
+	pat->setScale(game_model->getModelScale());
+	pat->addChild(game_model->getGraphicalModel());
+	pat->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON); 
+	mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
+	
+	
+	setCellData(address, boost::shared_ptr<nsGameCore::CellData>(new nsGameCore::CellData(address, game_model)));
 }
 
 

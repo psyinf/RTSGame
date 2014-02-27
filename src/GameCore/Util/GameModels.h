@@ -89,21 +89,27 @@ public:
 	std::string getModelDescriptorPath() const;
 
 	std::string getModelDisplayName() const;
-
-	virtual void parse(const std::string& model_description_file) = 0;
+	
+	virtual void parse(const std::string& model_description_file);
 
 	virtual boost::shared_ptr<GameModel> clone() = 0;
 
 	Properties& getProperties();
 
+	osg::Matrix getPlacementMatrix() const;
+
+	osg::Vec3 getModelScale() const;
 protected:
 	void loadGraphicalModel(const std::string& path);
+	void addPropertyFromNode( nsXML::XMLNode &properties_node, std::string type );
 protected:
 	GameModelManager&		mrGameModelManager;	
 	std::string				mModelTypeName;
 	std::string				mModelDisplayName;
 	osg::ref_ptr<osg::Node> mGraphicalModel;
 	Properties				mProperties;
+	osg::Matrix				mPlacementMatrix;
+	osg::Vec3				mModelScale;
 };
 
 
@@ -125,7 +131,7 @@ public:
 
 	
 protected:
-	void addPropertyFromNode( nsXML::XMLNode &properties_node, std::string type );
+
 
 	
 protected:

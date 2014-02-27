@@ -1,4 +1,4 @@
-<GameBuilding>
+<GameModel>
 	<DisplayName>FusionReactor</DisplayName>
 	<ModelName>Factory.obj</ModelName>
 	<Properties>
@@ -12,4 +12,4 @@
 		<Status name = "ConstructionFinished" value = "0.0"/>
 		<Status name = "ConstructionSpeed" value = "0.05"/>
 	</Properties>
-</GameBuilding>
+</GameModel>

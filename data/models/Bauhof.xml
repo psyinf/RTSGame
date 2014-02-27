@@ -1,11 +1,16 @@
 <GameModel>
-	<DisplayName>H3 Mine</DisplayName>
-	<ModelName>H3-Mine.obj</ModelName>
+	<DisplayName>Bauhöfle</DisplayName>
+	<ModelName>3d/Defense_Tower-FBX.FBX</ModelName>
+	<Offset>0,0,0</Offset>
+	<Rotate>0,90,0</Rotate>
+	<Scale>0.01,0.01,0.01</Scale>
 	<Properties>
-		<BuildingCost name = "CM" value = "100"/>
+		<BuildingCost name = "CM" value = "150"/>
 		<BuildingCost name = "Energy" value = "100"/>
+		
 		<RunningCost name = "Energy" value = "50"/>
-		<Production name = "H3" value = "50"/>
+		<RunningCost name = "Ores" value = "50"/>
+		<Production name = "CM" value = "150"/>
 		<Status name = "ProductionModifier" value = "1.0"/>
 		<Status name = "IsProducing" value = "1"/>
 		<Status name = "ConstructionFinished" value = "0.0"/>

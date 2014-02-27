@@ -169,7 +169,7 @@ public:
 
 	void frame();
 
-	boost::shared_ptr<GameModel> placeModel(osg::Vec3d& position, osg::Quat& orientation, osg::Vec3 scale, const std::string& model_type);
+	void placeModel(const CellAdress& address, const std::string& model_type);
 
 	CellDataPtr getCellData(const CellAdress& address);
 
