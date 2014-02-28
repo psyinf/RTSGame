@@ -9,27 +9,7 @@ namespace nsXML
 {
 	class XMLNode;
 };
-/*
-namespace boost {
-	template<> 
-	inline bool lexical_cast<bool, std::string>(const std::string& arg) 
-	{
-		std::istringstream ss(arg);
-		bool b;
-		ss >> std::boolalpha >> b;
-		return b;
-	}
 
-	template<>
-	std::string lexical_cast<std::string, bool>(const bool& b) 
-	{
-		std::ostringstream ss;
-		ss << std::boolalpha << b;
-		return ss.str();
-	}
-
-}
-*/
 namespace nsGameCore{
 class GameModel;
 
@@ -81,6 +61,7 @@ public:
 	GameModel(GameModelManager& game_model_manager, const std::string& model_type_name)
 		:mrGameModelManager(game_model_manager)
 		,mModelTypeName(model_type_name)
+		,mModelScale(1,1,1)
 	{}
 	virtual ~GameModel() {}
 
