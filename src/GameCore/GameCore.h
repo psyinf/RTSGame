@@ -169,7 +169,7 @@ public:
 
 	void frame();
 
-	void placeModel(const CellAdress& address, const std::string& model_type);
+	void placeModel(const CellAdress& address, const std::string& model_type, float height);
 
 	CellDataPtr getCellData(const CellAdress& address);
 

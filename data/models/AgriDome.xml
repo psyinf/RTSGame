@@ -1,0 +1,20 @@
+<GameModel>
+	<DisplayName>Agricultural Dome</DisplayName>
+	<ModelName>3d/Cylinder.flt</ModelName>
+	<Scale>1.0,1.0,1.0</Scale>
+	<Properties>
+		<BuildingCost name = "CM" value = "1750"/>
+		<BuildingCost name = "Energy" value = "100"/>
+		
+		<RunningCost name = "Energy" value = "10"/>
+		
+		<Production name = "Water" value = "10"/>
+		<Production name = "Air" value = "10"/>
+		<Production name = "Food" value = "5"/>
+		
+		<Status name = "ProductionModifier" value = "1.0"/>
+		<Status name = "IsProducing" value = "1"/>
+		<Status name = "ConstructionFinished" value = "0.0"/>
+		<Status name = "ConstructionSpeed" value = "0.05"/>
+	</Properties>
+</GameModel>

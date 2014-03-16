@@ -140,7 +140,6 @@ void nsGameCore::GameLogic::updateCosts()
 			continue;
 		}
 		std::string model_type = cell_data->model_instance->getModelDisplayName();
-		//if (boost::iequals(model_type, "H3-Mine"))
 		{
 			float  is_build = nsGameCore::ValueRef<float> (game_building->getProperties(), "Status", "ConstructionFinished").get();
 			if (1.0 > is_build)

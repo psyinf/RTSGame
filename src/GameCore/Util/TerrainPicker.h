@@ -50,7 +50,7 @@ public:
 
 	void setSelectionColor(const osg::Vec4& color );
 
-	void pickTerrain( osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
+	void levelTerrain( osgViewer::View* view, const osgGA::GUIEventAdapter& ea);
 
 	void getFace(const osgUtil::LineSegmentIntersector::Intersection& intersection);
 

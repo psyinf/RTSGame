@@ -23,8 +23,9 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 
 
 	osg::HeightField* height_field = osgDB::readHeightFieldFile(height_field_path,options);
-	//height_field->setXInterval(16);
-	//height_field->setYInterval(16);
+// 	height_field->setXInterval(1);
+// 	height_field->setYInterval(16);
+	
 	osg::ref_ptr<osgTerrain::GeometryTechnique> terrain_geometry_technique = new osgTerrain::ModifyingTerrainTechnique();
 	terrain_geometry_technique->setFilterMatrixAs(osgTerrain::GeometryTechnique::GAUSSIAN);
 	
@@ -33,6 +34,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	{
 		throw (std::runtime_error("Cannot load specified height field: " + base_name));
 	}
+	
 	//try to find a visual layer
 	
 
@@ -43,17 +45,20 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 
 	//create a height field layer from the height field, using the locator
 	osg::Texture::FilterMode filter = osg::Texture::LINEAR;
+	
 	osg::ref_ptr<osgTerrain::HeightFieldLayer> hf_layer = new osgTerrain::HeightFieldLayer(height_field);
 	hf_layer->setLocator(Locator1);
 	hf_layer->setMagFilter(filter);
-
+	//hf_layer->transform(0,0.1);
 	//create a terrain-tile and add the height field
 	osg::ref_ptr<osgTerrain::TerrainTile> terrain_tile = new osgTerrain::TerrainTile;
 	terrain_tile->setElevationLayer( hf_layer.get() );
 	terrain_tile->setRequiresNormals(true);
+	
 
 	terrain_tile->setTerrainTechnique(terrain_geometry_technique);
 	terrain_tile->setDirty(true);
+	
 	osg::Image* diffuse_texture = osgDB::readImageFile(diff_field_path);
 	if (diffuse_texture)
 	{
@@ -61,7 +66,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	}
 
 	mTerrain->addChild( terrain_tile.get() );
-	
+	/*
 	{
 		osg::Group* grid_group = new osg::Group();
 		osg::StateSet* ss =grid_group->getOrCreateStateSet();
@@ -79,7 +84,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 		grid_group->addChild(terrain_tile);
 		mTerrain->addChild(grid_group);
 	}
-
+	*/
 	mTerrain->setTerrainTechniquePrototype(terrain_geometry_technique);
 	
 	osg::ref_ptr<osgGA::EventHandler> pick_handler = new nsGameCore::PickHandler(mrGameCore);
