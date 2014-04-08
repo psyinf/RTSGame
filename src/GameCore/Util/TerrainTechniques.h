@@ -34,6 +34,10 @@ namespace osgTerrain {
 
 		osg::Vec3i getTilePosition(const osg::Vec3d& clamped_normalized) const;
 
+		void calculateAmbientApperture();
+
+		virtual void generateGeometry(  osgTerrain::GeometryTechnique::BufferData& buffer,osgTerrain::Locator* masterLocator, const osg::Vec3d& centerModel  );
+
 	};
 
 }

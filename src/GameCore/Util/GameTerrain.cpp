@@ -26,7 +26,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 // 	height_field->setXInterval(1);
 // 	height_field->setYInterval(16);
 	
-	osg::ref_ptr<osgTerrain::GeometryTechnique> terrain_geometry_technique = new osgTerrain::ModifyingTerrainTechnique();
+	osg::ref_ptr<osgTerrain::ModifyingTerrainTechnique> terrain_geometry_technique = new osgTerrain::ModifyingTerrainTechnique();
 	terrain_geometry_technique->setFilterMatrixAs(osgTerrain::GeometryTechnique::GAUSSIAN);
 	
 
@@ -90,6 +90,32 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	osg::ref_ptr<osgGA::EventHandler> pick_handler = new nsGameCore::PickHandler(mrGameCore);
 	
 	mrGameCore.getRenderCore().addEventHandler(pick_handler);
+
+	//////////////////////////////////////////////////////////////////////////
+	/*osgTerrain::HeightFieldLayer* hfl = dynamic_cast<osgTerrain::HeightFieldLayer*>( terrain_tile->getElevationLayer() );
+	if (hfl)
+	{
+		osgTerrain::Locator* locator = hfl->getLocator();
+		double step_row = 1.0 / hfl->getNumRows();
+		double step_col = 1.0 / hfl->getNumColumns();
+		for (double row_idx = 0.0; row_idx < 1.0; row_idx+=step_row)
+		{
+			for (double col_idx = 0.0; col_idx < 1.0; col_idx+=step_col)
+			{
+				osg::Vec3d model_coords;
+				osg::Vec3d local_coords(row_idx, col_idx,0);
+				locator->convertLocalToModel(local_coords, model_coords);
+				model_coords[2] = getHeight(local_coords[0], local_coords[1]);
+
+				//get ray intersection
+				osgUtil::LineSegmentIntersector lsi(model_coords, model_coords + osg::Vec3d(0,1,1));
+				osgUtil::IntersectionVisitor isv(&lsi);
+				terrain_tile->accept(lsi)
+			}
+		}
+	}*/
+	terrain_geometry_technique->calculateAmbientApperture();
+
 }
 
 nsGameCore::Terrain::~Terrain()

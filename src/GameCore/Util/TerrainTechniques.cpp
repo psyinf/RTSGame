@@ -1,6 +1,20 @@
 #include "TerrainTechniques.h"
 #include <osgTerrain/Terrain>
 #include <osgTerrain/TerrainTile>
+#include <osgUtil/LineSegmentIntersector>
+#include <osgUtil/RayIntersector>
+#include <osgDB/WriteFile>
+#include <gmtl/gmtl.h>
+#include <iostream>
+
+
+osg::Vec3d sampleUniform(float u1, float u2)
+{
+	const float r = gmtl::Math::sqrt(1.0f - u1 * u1);
+	const float phi = 2 * osg::PI * u2;
+	return osg::Vec3d(gmtl::Math::cos(phi) * r, gmtl::Math::sin(phi) * r, u1);	
+}
+
 
 bool osgTerrain::ModifyingTerrainTechnique::getHeight( double x, double y, double& height )
 {
@@ -71,6 +85,7 @@ void osgTerrain::ModifyingTerrainTechnique::update( osgUtil::UpdateVisitor* nv )
 void osgTerrain::ModifyingTerrainTechnique::init( int dirtyMask, bool assumeMultiThreaded )
 {
 	GeometryTechnique::init(dirtyMask, assumeMultiThreaded);
+	//calculateAmbientApperture();
 }
 
 osgTerrain::ModifyingTerrainTechnique::~ModifyingTerrainTechnique()
@@ -128,3 +143,66 @@ osg::Vec3i osgTerrain::ModifyingTerrainTechnique::getTilePosition( const osg::Ve
 	}
 	return osg::Vec3i(world_pos[0], world_pos[1], world_pos[2]);
 }
+
+void osgTerrain::ModifyingTerrainTechnique::calculateAmbientApperture()
+{
+	
+	HeightFieldLayer* hfl = dynamic_cast<HeightFieldLayer*>( getTerrainTile()->getElevationLayer() );
+	if (hfl)
+	{
+		osg::Vec4ubArray* data_array = new osg::Vec4ubArray(hfl->getNumRows() * hfl->getNumColumns() * 4);
+		osgTerrain::Locator* locator = hfl->getLocator();
+		double step_row = 1.0 / hfl->getNumRows();
+		double step_col = 1.0 / hfl->getNumColumns();
+
+		osg::Image* ambient = new osg::Image;
+		ambient->setImage(hfl->getNumRows(), hfl->getNumColumns(), 1, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE,(unsigned char*)(&data_array[0]), osg::Image::USE_NEW_DELETE);
+		//http://www.cse.ust.hk/~psander/docs/aperture.pdf
+		for (double row_idx = 0.0; row_idx < 1.0; row_idx+=step_row)
+		{
+			for (double col_idx = 0.0; col_idx < 1.0; col_idx+=step_col)
+			{
+				osg::Vec3d result_normal;
+				float apperture = 0.0;
+				osg::Vec3d model_coords;
+				osg::Vec3d local_coords(row_idx, col_idx,0);
+				locator->convertLocalToModel(local_coords, model_coords);
+				getHeight(local_coords[0], local_coords[1],model_coords[2]);
+				//sample 
+				for (unsigned int i = 0; i < 64; ++i)
+				{
+					double u1 = gmtl::Math::rangeRandom(0.0,1.0);
+					double u2 = gmtl::Math::rangeRandom(0.0,1.0);
+					osg::Vec3d rand_vector = sampleUniform(u1, u2);
+					//get ray intersection
+					osg::ref_ptr<osgUtil::LineSegmentIntersector> lsi = new osgUtil::LineSegmentIntersector(model_coords, model_coords + rand_vector * 1000.0 );
+					osgUtil::IntersectionVisitor isv(lsi);
+					getTerrainTile()->accept(isv);
+					
+					if (lsi->containsIntersections())
+					{
+						result_normal += rand_vector * (1.0 / 64.0);
+						apperture+= (1.0 / 64.0);
+						
+						//std::cout << "sdf" << std::endl;
+					}
+				}
+				//get the "visibility" term
+				apperture = gmtl::Math::aCos(1.0 - apperture );
+				int app_int = 255 * apperture;
+				memcpy(ambient->data(hfl->getNumRows() * row_idx, hfl->getNumColumns() * col_idx), &app_int, 1);
+
+				std::cout << apperture << std::endl;
+				
+			}
+		}
+		osgDB::writeImageFile(*ambient, "d:/test.jpg");	
+	}
+}
+
+void osgTerrain::ModifyingTerrainTechnique::generateGeometry( osgTerrain::GeometryTechnique::BufferData& buffer,osgTerrain::Locator* masterLocator, const osg::Vec3d& centerModel )
+{
+	osgTerrain::GeometryTechnique::generateGeometry(buffer, masterLocator, centerModel);
+	//calculateAmbientApperture();
+}
+
