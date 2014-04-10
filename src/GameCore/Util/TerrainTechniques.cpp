@@ -11,9 +11,13 @@
 
 osg::Vec3d sampleUniform(float u1, float u2)
 {
+
 	const float r = gmtl::Math::sqrt(1.0f - u1 * u1);
 	const float phi = 2 * osg::PI * u2;
-	return osg::Vec3d(gmtl::Math::cos(phi) * r, gmtl::Math::sin(phi) * r, u1);	
+	osg::Vec3d result = osg::Vec3d(gmtl::Math::cos(phi) * r, gmtl::Math::sin(phi) * r, u1);	
+	result = osg::Vec3d(0,0,1);
+	return result;
+
 }
 
 
@@ -153,6 +157,7 @@ void osgTerrain::ModifyingTerrainTechnique::calculateAmbientApperture()
 	{
 		//try to load ambient apperture
 		osg::ref_ptr<osg::Image> ambient = osgDB::readImageFile("d:/test.tif");
+		
 		if (!ambient)
 		{
 			osgTerrain::Locator* locator = hfl->getLocator();
@@ -162,44 +167,71 @@ void osgTerrain::ModifyingTerrainTechnique::calculateAmbientApperture()
 			//	
 			std::vector<unsigned char> image_data;
 			//http://www.cse.ust.hk/~psander/docs/aperture.pdf
+
+			//osg::ref_ptr<osgUtil::LineSegmentIntersector> lsi = new osgUtil::LineSegmentIntersector(osg::Vec3d(), osg::Vec3d());
+			osg::ref_ptr<osgUtil::RayIntersector> lsi = new osgUtil::RayIntersector();
+			
+			lsi->setCoordinateFrame(osgUtil::Intersector::MODEL);
+			lsi->setIntersectionLimit(osgUtil::Intersector::LIMIT_NEAREST);
+			lsi->setPrecisionHint(osgUtil::Intersector::USE_DOUBLE_CALCULATIONS);
 			for (double row_idx = 0.0; row_idx < 1.0; row_idx+=step_row)
 			{
+				std::cout << "Processing ambient occlusion data for row " << row_idx * hfl->getNumRows() << "/" <<  hfl->getNumRows() << std::endl;
 				for (double col_idx = 0.0; col_idx < 1.0; col_idx+=step_col)
 				{
-					osg::Vec3d result_normal;
+					osg::Vec3d result_normal(0,0,1);
 					float apperture = 0.0;
 					osg::Vec3d model_coords;
-					osg::Vec3d local_coords(row_idx, col_idx,0);
+					osg::Vec3d local_coords(row_idx + 0.5 * step_row, col_idx + 0.5 * step_col,0.5);
 					locator->convertLocalToModel(local_coords, model_coords);
 					getHeight(local_coords[0], local_coords[1],model_coords[2]);
+					//model_coords[2]+=10.5;
 					//sample 
-					for (unsigned int i = 0; i < 16; ++i)
+					unsigned int num_samples = 1;		
+					for (unsigned int i = 0; i < num_samples; ++i)
 					{
 						double u1 = gmtl::Math::rangeRandom(0.0,1.0);
 						double u2 = gmtl::Math::rangeRandom(0.0,1.0);
 						osg::Vec3d rand_vector = sampleUniform(u1, u2);
 						//get ray intersection
-						osg::ref_ptr<osgUtil::LineSegmentIntersector> lsi = new osgUtil::LineSegmentIntersector(model_coords, model_coords + rand_vector * 1000.0 );
+						lsi->reset();
+						lsi->setStart(model_coords);
+						lsi->setDirection(rand_vector);
 						osgUtil::IntersectionVisitor isv(lsi);
+						isv.setUseKdTreeWhenAvailable(true);
+						
 						getTerrainTile()->accept(isv);
 
 						if (!lsi->containsIntersections())
 						{
-							result_normal += rand_vector * (1.0 / 64.0);
-							apperture+= (1.0 / 64.0);
+							result_normal += rand_vector * (1.0 / num_samples);
+							apperture+= (1.0 / num_samples);
 
 							//std::cout << "sdf" << std::endl;
 						}
+						else
+						{
+							//TODO:check: this is intersecting point immediately above, which is stupip
+							//might be, that we have to consider slope at the point
+							osg::Vec3d intersection_point = lsi->getFirstIntersection().getWorldIntersectPoint();
+							osg::Vec3d intersection_normal= lsi->getFirstIntersection().getWorldIntersectNormal();
+							std::cout << "blocked by " << std::endl;
+
+						}
 					}
 					//get the "visibility" term
-					apperture = gmtl::Math::aCos(1.0 - apperture ) / gmtl::Math::PI;
+					apperture = gmtl::Math::aCos(1.0 - apperture ) / gmtl::Math::PI_OVER_2;
+					if (apperture > gmtl::Math::PI_OVER_2)
+					{
+						std::cout << "big app: "<<apperture << std::endl;
+					}
 					unsigned char app_int = 255 * apperture;
 					image_data.push_back(static_cast<char>(result_normal[0] * 255));
 					image_data.push_back(static_cast<char>(result_normal[1] * 255));
 					image_data.push_back(static_cast<char>(result_normal[2] * 255));
 					image_data.push_back(app_int);
 
-					std::cout << apperture << std::endl;
+					
 
 				}
 			}
@@ -207,9 +239,11 @@ void osgTerrain::ModifyingTerrainTechnique::calculateAmbientApperture()
 			ambient->setImage(hfl->getNumColumns(),hfl->getNumRows(), 1, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE,(unsigned char*)(&image_data[0]), osg::Image::NO_DELETE);
 			osgDB::writeImageFile(*ambient, "d:/test.tif");	
 		}
-		
+		ambient->setOrigin(osg::Image::TOP_LEFT);
 		getTerrainTile()->setColorLayer(getTerrainTile()->getNumColorLayers(), new osgTerrain::ImageLayer(ambient));
-		
+		osg::Uniform* sampler = new osg::Uniform("ambient", 1);
+		getTerrainTile()->getOrCreateStateSet()->addUniform(sampler);
+
 	}
 }
 
