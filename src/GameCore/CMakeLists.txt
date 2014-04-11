@@ -18,8 +18,12 @@ add_definitions( "/wd4503" )
 
 FILE(GLOB header_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 FILE(GLOB cpp_files "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+
 FILE(GLOB util_header_files "${CMAKE_CURRENT_SOURCE_DIR}/Util/*.h")
 FILE(GLOB util_cpp_files "${CMAKE_CURRENT_SOURCE_DIR}/Util/*.cpp")
+
+#FILE(GLOB cust_header_files "${CMAKE_CURRENT_SOURCE_DIR}/Custom/*.h")
+#FILE(GLOB cust_cpp_files "${CMAKE_CURRENT_SOURCE_DIR}/Custom/*.cpp")
 
  
 ADD_LIBRARY(GameCore STATIC 
@@ -27,6 +31,8 @@ ADD_LIBRARY(GameCore STATIC
 		${cpp_files}
 		${util_header_files} 
 		${util_cpp_files}
+#		${cust_header_files} 
+#		${cust_cpp_files}
 )
 TARGET_LINK_LIBRARIES(GameCore)
 

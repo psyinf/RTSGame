@@ -15,7 +15,7 @@ osg::Vec3d sampleUniform(float u1, float u2)
 	const float r = gmtl::Math::sqrt(1.0f - u1 * u1);
 	const float phi = 2 * osg::PI * u2;
 	osg::Vec3d result = osg::Vec3d(gmtl::Math::cos(phi) * r, gmtl::Math::sin(phi) * r, u1);	
-	result = osg::Vec3d(0,0,1);
+	//result = osg::Vec3d(0,0,1);
 	return result;
 
 }
@@ -42,6 +42,51 @@ bool osgTerrain::ModifyingTerrainTechnique::getHeight( double x, double y, doubl
 	}
 	return false;
 }
+
+
+void osgTerrain::ModifyingTerrainTechnique::getVertices( double x, double y, std::vector<osg::Vec3>& vertices ) const
+{
+	if (_terrainTile)
+	{
+		if (!(x >= 0.0 && x < 1.0 && y >= 0.0 && y < 1.0))
+		{
+			return;
+		}
+		const HeightFieldLayer* hfl = dynamic_cast<const HeightFieldLayer*>( getTerrainTile()->getElevationLayer() );
+		if (hfl)
+		{
+			const osg::HeightField* height_field = hfl->getHeightField();
+			if (height_field)
+			{
+				//height = height_field->getHeight(height_field->getNumRows() * x, height_field->getNumColumns() * y);
+				// 				return true;
+				double delta_x = 1.0 / height_field->getNumRows();
+				double delta_y = 1.0 / height_field->getNumColumns();
+				//0/0
+				vertices.push_back(height_field->getVertex(height_field->getNumRows() * x, height_field->getNumColumns() * y));
+				//-/-
+				vertices.push_back(height_field->getVertex(height_field->getNumRows() * osg::clampBetween(x - 1.0 * delta_x, 0.0, 1.0 - delta_x) , height_field->getNumColumns() * osg::clampBetween(y - 1.0 * delta_y, 0.0, 1.0 -delta_y)));
+				//+/-
+				vertices.push_back(height_field->getVertex(height_field->getNumRows() * osg::clampBetween(x + 1.0 * delta_x, 0.0, 1.0 - delta_x) , height_field->getNumColumns() * osg::clampBetween(y - 1.0 * delta_y, 0.0, 1.0 -delta_y)));
+				//+/+
+				vertices.push_back(height_field->getVertex(height_field->getNumRows() * osg::clampBetween(x + 1.0 * delta_x, 0.0, 1.0 - delta_x) , height_field->getNumColumns() * osg::clampBetween(y + 1.0 * delta_y, 0.0, 1.0 -delta_y)));
+				//-/+
+				vertices.push_back(height_field->getVertex(height_field->getNumRows() * osg::clampBetween(x - 1.0 * delta_x, 0.0, 1.0 - delta_x) , height_field->getNumColumns() * osg::clampBetween(y + 1.0 * delta_y, 0.0, 1.0 -delta_y)));
+				//0/+
+				vertices.push_back(height_field->getVertex(height_field->getNumRows() * osg::clampBetween(x, 0.0, 1.0 - delta_x) , height_field->getNumColumns() * osg::clampBetween(y + 1.0 * delta_y, 0.0, 1.0 -delta_y)));
+				//0/-
+				vertices.push_back(height_field->getVertex(height_field->getNumRows() * osg::clampBetween(x, 0.0, 1.0 - delta_x) , height_field->getNumColumns() * osg::clampBetween(y - 1.0 * delta_y, 0.0, 1.0 -delta_y)));
+				//-/0
+				vertices.push_back(height_field->getVertex(height_field->getNumRows() * osg::clampBetween(x - 1.0 * delta_x, 0.0, 1.0 - delta_x) , height_field->getNumColumns() * osg::clampBetween(y, 0.0, 1.0 -delta_y)));
+				//+/0
+				vertices.push_back(height_field->getVertex(height_field->getNumRows() * osg::clampBetween(x + 1.0 * delta_x, 0.0, 1.0 - delta_x) , height_field->getNumColumns() * osg::clampBetween(y, 0.0, 1.0 -delta_y)));
+			}
+
+		}
+	}
+	
+}
+
 
 bool osgTerrain::ModifyingTerrainTechnique::setHeight( double x, double y, double height )
 {
@@ -179,15 +224,27 @@ void osgTerrain::ModifyingTerrainTechnique::calculateAmbientApperture()
 				std::cout << "Processing ambient occlusion data for row " << row_idx * hfl->getNumRows() << "/" <<  hfl->getNumRows() << std::endl;
 				for (double col_idx = 0.0; col_idx < 1.0; col_idx+=step_col)
 				{
-					osg::Vec3d result_normal(0,0,1);
+					osg::Vec3d result_normal(0,0,0);
 					float apperture = 0.0;
 					osg::Vec3d model_coords;
-					osg::Vec3d local_coords(row_idx + 0.5 * step_row, col_idx + 0.5 * step_col,0.5);
+					osg::Vec3d local_coords(row_idx, col_idx  ,0.5);
+					
+					
+			
+				
 					locator->convertLocalToModel(local_coords, model_coords);
-					getHeight(local_coords[0], local_coords[1],model_coords[2]);
-					//model_coords[2]+=10.5;
+					
+					//getHeight(local_coords[0], local_coords[1],model_coords[2]);
+					
+					std::vector<osg::Vec3> vertices;
+					getVertices(row_idx, col_idx, vertices);
+					for (auto iter = vertices.begin(); iter != vertices.end(); ++iter)
+					{
+						model_coords[2]= std::max<double>(model_coords[2], (*iter)[2]);
+					}
+					model_coords[2] += 0.01;
 					//sample 
-					unsigned int num_samples = 1;		
+					unsigned int num_samples = 16;		
 					for (unsigned int i = 0; i < num_samples; ++i)
 					{
 						double u1 = gmtl::Math::rangeRandom(0.0,1.0);
@@ -213,10 +270,19 @@ void osgTerrain::ModifyingTerrainTechnique::calculateAmbientApperture()
 						{
 							//TODO:check: this is intersecting point immediately above, which is stupip
 							//might be, that we have to consider slope at the point
-							osg::Vec3d intersection_point = lsi->getFirstIntersection().getWorldIntersectPoint();
+						/*	osg::Vec3d intersection_point = lsi->getFirstIntersection().getWorldIntersectPoint();
 							osg::Vec3d intersection_normal= lsi->getFirstIntersection().getWorldIntersectNormal();
-							std::cout << "blocked by " << std::endl;
+							osg::Drawable* drawable =  lsi->getFirstIntersection().drawable;
+							osg::Array* vertex_array =drawable->asGeometry()->getVertexArray();
+							osg::Vec3Array* vert_array = dynamic_cast<osg::Vec3Array*>(vertex_array);
 
+							for (unsigned int i = 0; i < lsi->getFirstIntersection().indexList.size(); ++i)
+							{
+								osg::Vec3f vertex = (*vert_array)[lsi->getFirstIntersection().indexList[i]];
+							//	std::cout << i;
+							}
+							//std::cout << "blocked by " << std::endl;
+							*/
 						}
 					}
 					//get the "visibility" term
