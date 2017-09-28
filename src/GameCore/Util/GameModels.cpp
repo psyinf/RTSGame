@@ -11,7 +11,7 @@
 #include <osgDB/ReadFile>
 
 #include <boost/algorithm/string.hpp>
-#include <common/CustomShaderProgram.h>
+#include <common/CustomShader/CustomShaderProgram.h>
 
 
 void nsGameCore::GameModel::addPropertyFromNode( nsXML::XMLNode &properties_node, std::string type )
@@ -57,7 +57,7 @@ nsGameCore::GameBuilding::getGraphicalModel()
 	mGraphicalModel = dynamic_cast<osg::Node*>(node->clone(copy_flags));
 	//TODO: move this to a separate function to make it configurable
 	mGraphicalModel->getOrCreateStateSet()->getOrCreateUniform("ConstructionProgress", osg::Uniform::FLOAT)->set(0.0f);
-	nsRenderer::CustomShaderProgram* program = nsRenderer::CustomShaderProgram::loadProgram("data/shaders/Building", nsRenderer::ShaderInfo());
+	nsRenderer::ShaderProgram* program = nsRenderer::ShaderProgramHelpers::loadProgram("data/shaders/Building", nsRenderer::ShaderInfo());
 	mGraphicalModel->getOrCreateStateSet()->setAttribute(program, osg::StateAttribute::ON);
 
 	return mGraphicalModel;

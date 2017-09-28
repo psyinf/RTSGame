@@ -77,9 +77,10 @@ namespace nsGameCore
 #include <osgViewer/Renderer>
 
 //	Qt stuff
-#include <osgQt/GraphicsWindowQt>
-#include <QtGui/QApplication>
+
+#include <QApplication>
 #include <QTimer>
+#include <QWidget>
 
 QT_FORWARD_DECLARE_CLASS(QtGui)
 QT_FORWARD_DECLARE_CLASS(QCalendarWidget)
@@ -96,15 +97,15 @@ using Qt::WindowFlags;
 //#include "SilverLining/AtmosphereReference.h"
 
 //	other stuff
-#include "Common/CommonHelpers.h"
-#include "Common/FindAlphaVisitor.h"
-#include "Common/BindTexturesVisitor.h"
-#include "Common/FindLightsVisitor.h"
-#include "Common/FindNodeVisitor.h"
-#include "Common/NodeHelpers.h"
+#include <Common/CommonHelpers.h>
+#include <Common/Visitors/FindAlphaVisitor.h>
+#include <Common/Visitors/BindTexturesVisitor.h>
+#include <Common/Visitors/FindLightsVisitor.h>
+#include <Common/Visitors/FindNodeVisitor.h>
+#include <Common/NodeHelpers.h>
 #include <Common/RenderPass.h>
-#include "Common/SpaceMouseManipulator.h"
-#include "Common/SceneSupportData.h"
+//#include <Common/ SpaceMouseManipulator.h>
+#include <Common/SceneSupportData.h>
 
 #include <Filesystem/Directory.h>
 //#include <Common/PickHandler.h>

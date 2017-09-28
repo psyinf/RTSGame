@@ -23,9 +23,7 @@
 
 
 #include <Common/SceneData.h>
-#include <Core/EffectManager.h>
 #include <Common/RenderPass.h>
-#include <Common/CalculateBoundsVisitor.h>
 #include <Common/PickHandler.h>
 #include <Common/SceneSupportData.h>
 #include <Common/GetHotList.h>
@@ -94,7 +92,8 @@ void ViewerWidget::createContext()
     traits->sampleBuffers = ds->getMultiSamples();
     traits->samples = ds->getNumMultiSamples();
 
-    traits->inheritedWindowData = new WindowData(winId());
+	traits->inheritedWindowData = new WindowData((HWND)(winId()));
+
 
     if (ds->getStereo())
     {

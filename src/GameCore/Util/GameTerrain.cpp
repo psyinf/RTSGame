@@ -1,11 +1,11 @@
 #include "GameTerrain.h"
-#include "GameCore/GameCore.h"
-#include "GameCore/Util/TerrainPicker.h"
+#include <GameCore/GameCore.h>
+#include <GameCore/Util/TerrainPicker.h>
 #include <osgDB/FileNameUtils>
 #include <osg/PolygonOffset>
 #include <osg/PolygonMode>
 #include <osg/Material>
-#include "common/CustomShaderProgram.h"
+#include <Common/CustomShader/CustomShaderProgram.h>
 
 
 osg::ref_ptr<osg::Group> nsGameCore::Terrain::getTerrainNode()
@@ -95,7 +95,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 
 	terrain_geometry_technique->calculateAmbientApperture();
 	
-	nsRenderer::CustomShaderProgram* program = nsRenderer::CustomShaderProgram::loadProgram("data/shaders/Terrain", nsRenderer::ShaderInfo());
+	nsRenderer::ShaderProgram* program = nsRenderer::ShaderProgramHelpers::loadProgram("data/shaders/Terrain", nsRenderer::ShaderInfo());
 	mTerrain->getOrCreateStateSet()->setAttribute(program, osg::StateAttribute::ON);
 
 }

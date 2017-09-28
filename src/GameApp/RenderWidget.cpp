@@ -18,9 +18,7 @@
 
 
 #include <Common/SceneData.h>
-#include <Core/EffectManager.h>
 #include <Common/RenderPass.h>
-#include <Common/CalculateBoundsVisitor.h>
 #include <Common/PickHandler.h>
 #include <Common/SceneSupportData.h>
 #include <Common/GetHotList.h>
@@ -89,7 +87,7 @@ void ViewerWidget::createContext()
     traits->sampleBuffers = ds->getMultiSamples();
     traits->samples = ds->getNumMultiSamples();
 
-    traits->inheritedWindowData = new WindowData(winId());
+    traits->inheritedWindowData = new WindowData((HWND)winId());
 
     if (ds->getStereo())
     {
@@ -138,14 +136,7 @@ void ViewerWidget::createContext()
 	keyswitchManipulator->addMatrixManipulator( '2', "Flight", new osgGA::FlightManipulator() );
 	keyswitchManipulator->addMatrixManipulator( '3', "Drive", new osgGA::DriveManipulator() );
 	keyswitchManipulator->addMatrixManipulator( '4', "Terrain", new osgGA::TerrainManipulator() ); 
-	try 
-	{
-		keyswitchManipulator->addMatrixManipulator( '5', "SpaceMouse", new nsRenderer::SpaceMouseManipulator );
-	}
-	catch (const std::exception&)
-	{
-		std::cerr << "Spacemouse not found\n" << std::endl;
-	}
+	
 
 
 	mRenderCore->setup();

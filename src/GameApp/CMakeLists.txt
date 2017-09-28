@@ -1,90 +1,45 @@
-cmake_minimum_required(VERSION 2.8)
-PROJECT( GameApp)
+set(APP_NAME GameApp)
 
-SET(ES_3RD_PARTY_DIR  "NOT FOUND")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/../CMakeModules/")
+include(WinDeployQt)
 
- 
-find_package(GMTL REQUIRED)
-find_package(OSG REQUIRED)
-find_package(OIS REQUIRED)
-find_package(SDK REQUIRED)
-find_package(RENDERCORE REQUIRED) 
-find_package(LUA REQUIRED)
-find_package(BOOST REQUIRED)
+file(GLOB HEADER_FILES 	"*.h")
+file(GLOB CPP_FILES 	"*.cpp")
+file(GLOB UI_FILES 		"*.ui")
 
-FIND_PACKAGE(QT REQUIRED)
-FIND_PACKAGE(GEOGRAPHICLIB REQUIRED)
- 
-FILE(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-FILE(GLOB CPP_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
-   
-FILE(GLOB MOC_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-FILE(GLOB UIS	 "${CMAKE_CURRENT_SOURCE_DIR}/*.ui")
-FILE(GLOB RCS	 "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc")
-     
-QT4_ADD_RESOURCES(RC_SRCS ${RCS} )
- 
-QT4_WRAP_UI( UI_HDRS ${UIS})
-
-QT4_WRAP_CPP(MOC_SRCS ${MOC_HDRS} ) 
-
-INCLUDE_DIRECTORIES(${GMTL_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${OIS_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${OSG_INCLUDE_DIR}/)
-INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/src/GameApp)
-INCLUDE_DIRECTORIES(${RENDERCOMMON_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${RENDERCORE_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${SDK_INCLUDE_DIR}/common)
-INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIR})
-
-#TODO: add findrender by psy
-INCLUDE_DIRECTORIES(${SDK_INCLUDE_DIR}/Render/)
-##
-INCLUDE_DIRECTORIES(${GMTL_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${QT_INCLUDE_DIR}/)
-INCLUDE_DIRECTORIES(${QT_INCLUDE_DIR}/QtCore/)
-INCLUDE_DIRECTORIES(${QT_INCLUDE_DIR}/QtGui/)
-INCLUDE_DIRECTORIES(${QT_INCLUDE_DIR}/QtOpenGL/)
-
-LINK_DIRECTORIES(${QT_LIBRARY})
-LINK_DIRECTORIES(${COMMON_LIBRARY})
-LINK_DIRECTORIES(${OSG_LIBRARY})
-LINK_DIRECTORIES(${SDK_LIBRARY})
-LINK_DIRECTORIES(${LUA_LIBRARY})
-LINK_DIRECTORIES(${OIS_LIBRARY})
-LINK_DIRECTORIES(${BOOST_LIBRARY})
-LINK_DIRECTORIES(${RENDER_LIBRARY})
-ADD_DEFINITIONS(-DRENDER_PLUGIN_IMPORTS)
-ADD_DEFINITIONS(${QT_DEFINITIONS})
-SET_PROPERTY(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG QT_DEBUG)
-SET_PROPERTY(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE QT_NO_DEBUG)
-
-ADD_EXECUTABLE( GameApp ${SRCS} ${MOC_SRCS} ${RC_SRCS} ${UI_HDRS} ${HEADER_FILES} ${CPP_FILES} )
-
-TARGET_LINK_LIBRARIES(  GameApp ${QT_LIBRARIES} 
-						debug QtCored4.lib debug QtGuid4.lib 
-						optimized QtCore4.lib optimized QtGui4.lib 
-						optimized osg optimized osgGA optimized osgViewer optimized osgQt optimized osgDB optimized osgText optimized osgSim optimized osgUtil optimized osgParticle 
-						debug osgd debug osgGAd debug osgViewerd debug osgQtd debug osgDBd debug osgTextd debug osgSimd debug osgUtild debug osgParticled
-						debug osgTerraind optimized osgTerrain
-						debug osgWidgetd optimized osgWidget
-						debug RenderCommon_d.lib optimized RenderCommon.lib
-						debug RenderCore_d.lib optimized RenderCore.lib
-						debug common_d optimized common
-						debug OpenThreadsd optimized OpenThreads
-						debug OIS_static_d
-						optimized OIS_static
-						debug Luad optimized Lua
-						GameCore
-						)
-
-SET_TARGET_PROPERTIES(GameApp PROPERTIES DEBUG_POSTFIX _d)						
-						
-INSTALL(TARGETS GameApp
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+add_executable(${APP_NAME} 
+	${HEADER_FILES}
+	${CPP_FILES}
+	${UI_FILES}
 )
 
-SET_PROPERTY(TARGET GameApp	PROPERTY FOLDER "GameApp")
+
+target_link_libraries(${APP_NAME}
+	PRIVATE
+		RTSGame::Core		
+		Render::Core
+		Render::Common
+		Qt5::Core
+		Qt5::Widgets
+)
+
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" 
+			FILES ${HEADER_FILES} ${CPP_FILES}
+			)
+
+target_include_directories(${APP_NAME} PRIVATE
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+)
+
+set_target_properties(${APP_NAME} PROPERTIES
+	AUTOMOC	ON
+	AUTOUIC	ON
+	AUTORCC	ON
+)
+
+install(TARGETS ${APP_NAME}
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib/${PROJECT_INSTALL_PREFIX}
+	ARCHIVE DESTINATION lib/${PROJECT_INSTALL_PREFIX}
+)
+
+WinDeployQt(TARGET ${APP_NAME} COMPILER_RUNTIME )

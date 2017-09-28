@@ -1,46 +1,25 @@
-find_package(RENDERCORE REQUIRED)
-find_package(SDK REQUIRED)
-INCLUDE_DIRECTORIES(${GMTL_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${COMMON_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${OSG_INCLUDE_DIR}/)
-INCLUDE_DIRECTORIES(${SDK_INCLUDE_DIR}/common) 
-INCLUDE_DIRECTORIES(${GEOGRAPHICLIB_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${RENDERCOMMON_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${RENDERCORE_INCLUDE_DIR})
+file(GLOB_RECURSE header_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h") 
+file(GLOB_RECURSE cpp_files "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
-LINK_DIRECTORIES(${RENDER_LIBRARY}) 
-LINK_DIRECTORIES(${BOOST_LIBRARY})
-LINK_DIRECTORIES(${GEOGRAPHICLIB_LIBRARY})
-
-SET(DBINFO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/"  CACHE INTERNAL "db info include directory")
-add_definitions( "/wd4503" )
-
-FILE(GLOB header_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-FILE(GLOB cpp_files "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
-
-FILE(GLOB util_header_files "${CMAKE_CURRENT_SOURCE_DIR}/Util/*.h")
-FILE(GLOB util_cpp_files "${CMAKE_CURRENT_SOURCE_DIR}/Util/*.cpp")
-
-#FILE(GLOB cust_header_files "${CMAKE_CURRENT_SOURCE_DIR}/Custom/*.h")
-#FILE(GLOB cust_cpp_files "${CMAKE_CURRENT_SOURCE_DIR}/Custom/*.cpp")
-
- 
-ADD_LIBRARY(GameCore STATIC 
-		${header_files} 
-		${cpp_files}
-		${util_header_files} 
-		${util_cpp_files}
-#		${cust_header_files} 
-#		${cust_cpp_files}
+add_library(GameCore STATIC
+	${header_files}			${cpp_files}
 )
-TARGET_LINK_LIBRARIES(GameCore)
+add_library(RTSGame::Core ALIAS GameCore)
 
-INSTALL(FILES ${header_files} DESTINATION include/Core/)
-INSTALL(TARGETS GameCore
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+target_link_libraries(GameCore
+	PUBLIC
+		Boost::boost
+		Boost::thread
+		Render::Common
+		Render::Core
+		OSG::osg
+		SDK::common
+		Gmtl
+	
+	PRIVATE
+		Boost::program_options
 )
 
- 
+#target_include_directories(GameCore INTERFACE
+	#$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
+#)
