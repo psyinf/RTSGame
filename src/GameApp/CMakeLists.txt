@@ -18,6 +18,7 @@ target_link_libraries(${APP_NAME}
 		RTSGame::Core		
 		Render::Core
 		Render::Common
+		OSG::osgWidget
 		Qt5::Core
 		Qt5::Widgets
 )

@@ -78,7 +78,7 @@ void ViewerWidget::createContext()
 		traits->displayNum = 0;
 	}
 
-    traits->windowName = "osgViewerQt";
+    traits->windowName = "GameApp";
     traits->screenNum = mConfig.mWindowProps.mScreen;
     traits->x = mConfig.mWindowProps.mStartX;;
     traits->y = mConfig.mWindowProps.mStartY;;
@@ -95,37 +95,15 @@ void ViewerWidget::createContext()
 	traits->inheritedWindowData = new WindowData((HWND)(winId()));
 
 
-    if (ds->getStereo())
-    {
-        switch(ds->getStereoMode())
-        {
-        case(osg::DisplaySettings::QUAD_BUFFER): traits->quadBufferStereo = true; break;
-        case(osg::DisplaySettings::VERTICAL_INTERLACE):
-        case(osg::DisplaySettings::CHECKERBOARD):
-        case(osg::DisplaySettings::HORIZONTAL_INTERLACE): traits->stencil = 8; break;
-        default: break;
-        }
-    }
 
     osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits.get());
     mOsgGraphicsWindow = dynamic_cast<osgViewer::GraphicsWindow*>(gc.get());
 
-    // get around dearanged traits on X11 (MTCompositeViewer only)
-    if (mbOverrideTraits)
-    {
-        traits->x = x();
-        traits->y = y();
-        traits->width = width();
-        traits->height = height();
-	}
-
+    
 	mRenderCore.reset(new nsRenderer::Core(mConfig));
 	mRenderCore->setStatsHandler(new osgViewer::StatsHandler());
     
-
-    //mRenderCore->getViewerRef()->addEventHandler(new osgViewer::LODScaleHandler);
-
-	//mRenderCore->getViewerRef()->setThreadingModel(osgViewer::Viewer::SingleThreaded);
+	    
 	mRenderCore->getViewerRef()->getCamera()->setGraphicsContext( mOsgGraphicsWindow );
 	mRenderCore->getViewerRef()->getCamera()->setViewport( new osg::Viewport(0,0,traits->width,traits->height) );
 	mRenderCore->getViewerRef()->addEventHandler( new osgGA::StateSetManipulator() );
@@ -134,8 +112,6 @@ void ViewerWidget::createContext()
 	mRenderCore->getViewerRef()->setKeyEventSetsDone( 0 );
 	mRenderCore->getViewerRef()->setQuitEventSetsDone( false );
 	mRenderCore->getViewerRef()->getCamera()->setAllowEventFocus(true);
-
-	//osg::setNotifyLevel( osg::NOTICE );
 
 	osgGA::KeySwitchMatrixManipulator* keyswitchManipulator = new osgGA::KeySwitchMatrixManipulator;
 	keyswitchManipulator->addMatrixManipulator( '1', "Trackball", new osgGA::TrackballManipulator() );
@@ -166,8 +142,6 @@ void ViewerWidget::createContext()
 
 bool ViewerWidget::setupScene( const std::string& model_name )
 {
-	//TODO: this should be based on a config option or strg/shift modifier
-	//mRenderCore->reset();
 	osg::ref_ptr<osg::Node> loaded_scene = mRenderCore->loadScene(model_name, true);
 	if (loaded_scene)
 	{
@@ -202,7 +176,7 @@ void ViewerWidget::updateFrame()
 		}
 		catch (const std::exception& e)
 		{
-			
+			std::cerr << "Error initializing Core: " << e.what() << std::endl;
 		}
 		
 	}

@@ -95,8 +95,8 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 
 	terrain_geometry_technique->calculateAmbientApperture();
 	
-	nsRenderer::ShaderProgram* program = nsRenderer::ShaderProgramHelpers::loadProgram("data/shaders/Terrain", nsRenderer::ShaderInfo());
-	mTerrain->getOrCreateStateSet()->setAttribute(program, osg::StateAttribute::ON);
+	//nsRenderer::ShaderProgram* program = nsRenderer::ShaderProgramHelpers::loadProgram("data/shaders/Terrain", nsRenderer::ShaderInfo());
+	//mTerrain->getOrCreateStateSet()->setAttribute(program, osg::StateAttribute::ON);
 
 }
 

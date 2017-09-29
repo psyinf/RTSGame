@@ -12,14 +12,11 @@ target_link_libraries(GameCore
 		Boost::thread
 		Render::Common
 		Render::Core
-		OSG::osg
 		SDK::common
 		Gmtl
-	
-	PRIVATE
-		Boost::program_options
+			
 )
 
-#target_include_directories(GameCore INTERFACE
-	#$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
-#)
+target_include_directories(GameCore INTERFACE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
+)
