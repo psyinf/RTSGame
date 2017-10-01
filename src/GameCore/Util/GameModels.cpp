@@ -58,7 +58,7 @@ nsGameCore::GameBuilding::getGraphicalModel()
 	//TODO: move this to a separate function to make it configurable
 	mGraphicalModel->getOrCreateStateSet()->getOrCreateUniform("ConstructionProgress", osg::Uniform::FLOAT)->set(0.0f);
 	nsRenderer::ShaderProgram* program = nsRenderer::ShaderProgramHelpers::loadProgram("data/shaders/Building", nsRenderer::ShaderInfo());
-	mGraphicalModel->getOrCreateStateSet()->setAttribute(program, osg::StateAttribute::ON);
+	//mGraphicalModel->getOrCreateStateSet()->setAttribute(program, osg::StateAttribute::ON);
 
 	return mGraphicalModel;
 }

@@ -93,14 +93,14 @@ static QtKeyboardMap sQtKeyBoardMap;
 
 void ViewerWidget::keyPressEvent(QKeyEvent * event)
 {
-	setKeyboardModifiers(event);
+//	setKeyboardModifiers(event);
 	int value = sQtKeyBoardMap.remapKey(event);
 	getEventQueue()->keyPress(value);
 }
 
 void ViewerWidget::keyReleaseEvent(QKeyEvent* event)
 {
-	setKeyboardModifiers(event);
+//	setKeyboardModifiers(event);
 	int value = sQtKeyBoardMap.remapKey(event);
 	getEventQueue()->keyRelease(value);
 }
@@ -212,12 +212,14 @@ osgGA::EventQueue* ViewerWidget::getEventQueue() const
 
 void ViewerWidget::setKeyboardModifiers(QInputEvent* event)
 {
+
 	int modkey = event->modifiers() & (Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier);
 	unsigned int mask = 0;
 	if (modkey & Qt::ShiftModifier) mask |= osgGA::GUIEventAdapter::MODKEY_SHIFT;
 	if (modkey & Qt::ControlModifier) mask |= osgGA::GUIEventAdapter::MODKEY_CTRL;
 	if (modkey & Qt::AltModifier) mask |= osgGA::GUIEventAdapter::MODKEY_ALT;
 	getEventQueue()->getCurrentEventState()->setModKeyMask(mask);
+	std::cout << "mod" << mask <<" \n";
 }
 
 bool ViewerWidget::setupScene( const std::string& model_name )

@@ -45,7 +45,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mTerrain.reset(new nsGameCore::Terrain(*this));
 	mTerrain->load("./data/levels/Channelled land.tif" );
 	mrCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
-	
+	mrCore.getMainRoot()->addChild(mrCore.getSubRoot("MAIN_ROOT"));
 	mModelManager.reset(new nsGameCore::GameModelManager("./data/models"));
 	mGameArea.reset(new nsGameCore::GameArea(*this));
 	
@@ -85,7 +85,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mHUDManager->getMenu("Terrain")->addEntry("Raise", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Up")));
 	mHUDManager->getMenu("Terrain")->addEntry("Lower", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Down")));
 	mHUDManager->getMenu("Terrain")->addEntry("Level", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Level")));
-	//mHUDManager->getMenu("Debug")->addEntry("Level", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this, "Terrain", "Level")));
+
 	
 	mGameLogic.reset(new GameLogic(*this));
 

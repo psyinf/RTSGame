@@ -179,7 +179,6 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	{
 		highlightSelected();
 	}
-	std::cout << is_active << std::endl;
 
 	switch(ea.getEventType())
 	{
