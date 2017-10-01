@@ -15,7 +15,6 @@ osg::ref_ptr<osg::Group> nsGameCore::Terrain::getTerrainNode()
 
 void nsGameCore::Terrain::load( const std::string& base_name )
 {
-	//osgTerrain::Terrain* terrain = new osgTerrain::Terrain;
 	const std::string height_field_path = osgDB::getNameLessExtension(base_name) + "_height" + osgDB::getFileExtensionIncludingDot(base_name) +".gdal";
 	const std::string diff_field_path = osgDB::getNameLessExtension(base_name) + "_diff" + osgDB::getFileExtensionIncludingDot(base_name) +".gdal";
 	osg::ref_ptr<osgDB::Options> options = new osgDB::Options;
@@ -23,8 +22,6 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 
 
 	osg::HeightField* height_field = osgDB::readHeightFieldFile(height_field_path,options);
-// 	height_field->setXInterval(1);
-// 	height_field->setYInterval(16);
 	
 	osg::ref_ptr<osgTerrain::ModifyingTerrainTechnique> terrain_geometry_technique = new osgTerrain::ModifyingTerrainTechnique();
 	terrain_geometry_technique->setFilterMatrixAs(osgTerrain::GeometryTechnique::GAUSSIAN);
@@ -66,25 +63,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	}
 
 	mTerrain->addChild( terrain_tile.get() );
-	/*
-	{
-		osg::Group* grid_group = new osg::Group();
-		osg::StateSet* ss =grid_group->getOrCreateStateSet();
-		osg::PolygonOffset* polyoffset = new osg::PolygonOffset;
-		polyoffset->setFactor(-1.0f);
-		polyoffset->setUnits(-1.0f);
-		osg::PolygonMode* polymode = new osg::PolygonMode;
-		polymode->setMode(osg::PolygonMode::FRONT_AND_BACK,osg::PolygonMode::LINE);
-		ss->setAttributeAndModes(polyoffset,osg::StateAttribute::OVERRIDE|osg::StateAttribute::ON);
-		ss->setAttributeAndModes(polymode,osg::StateAttribute::OVERRIDE|osg::StateAttribute::ON);
-		osg::Material* material = new osg::Material;
-		ss->setAttributeAndModes(material,osg::StateAttribute::OVERRIDE|osg::StateAttribute::ON);
-		ss->setMode(GL_LIGHTING,osg::StateAttribute::OVERRIDE|osg::StateAttribute::OFF);
-		ss->setMode(GL_LINE_SMOOTH, osg::StateAttribute::ON);
-		grid_group->addChild(terrain_tile);
-		mTerrain->addChild(grid_group);
-	}
-	*/
+
 	mTerrain->setTerrainTechniquePrototype(terrain_geometry_technique);
 	
 	osg::ref_ptr<osgGA::EventHandler> pick_handler = new nsGameCore::PickHandler(mrGameCore);
@@ -93,7 +72,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 
 	//////////////////////////////////////////////////////////////////////////
 
-	terrain_geometry_technique->calculateAmbientApperture();
+	//terrain_geometry_technique->calculateAmbientApperture();
 	
 	//nsRenderer::ShaderProgram* program = nsRenderer::ShaderProgramHelpers::loadProgram("data/shaders/Terrain", nsRenderer::ShaderInfo());
 	//mTerrain->getOrCreateStateSet()->setAttribute(program, osg::StateAttribute::ON);

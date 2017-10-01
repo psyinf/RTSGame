@@ -1,16 +1,10 @@
 #include "GameGUI.h"
 
-#include <osgViewer/View>
- 
-#include <boost/assign.hpp>
 
-#include <Core/EnvironmentInterface.h>
-
-#include "GameRenderWidget.h"
 
 #include <QtGui>
 
-using namespace boost::assign;
+
 
 DesktopMainWindow::DesktopMainWindow(nsRenderer::Config& config, std::string& filename, bool viewer_mode, int dock_pos)
 : mConfig(config)

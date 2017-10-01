@@ -159,7 +159,7 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	
 	bool treat_as_handled =false;
 	//determine mode
-	bool is_active = (ea. getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_SHIFT);
+	bool is_active = (ea.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_SHIFT);
 	bool is_terrain_mode = is_active && boost::istarts_with(mrGameCore.getCurrentEditMode().getCurrentModeName(),"TERRAIN");
 	bool is_place_mode = is_active && boost::istarts_with(mrGameCore.getCurrentEditMode().getCurrentModeName(),"PLACE");
 	std::string sub_edit_mode = mrGameCore.getCurrentEditMode().getSubMode();
@@ -179,8 +179,7 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	{
 		highlightSelected();
 	}
-
-	
+	std::cout << is_active << std::endl;
 
 	switch(ea.getEventType())
 	{
@@ -224,12 +223,10 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 			if (0 == (ea.getButtonMask() & osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON) && mLeftMousePressed)
 			{
 				mLeftMousePressed = false;
-				std::cout << "left up" << std::endl;
 			}
 			if (0 == (ea.getButtonMask() & osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON) && mRightMousePressed)
 			{
 				mRightMousePressed = false;
-				std::cout << "right up" << std::endl;
 			}
 		}
 	break;

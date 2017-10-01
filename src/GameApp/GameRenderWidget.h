@@ -26,6 +26,7 @@ typedef osgViewer::GraphicsWindowWin32::WindowData WindowData;
 namespace nsRenderer
 {
 	class SceneData;
+	class EnvironmentInterface;
 }
 namespace nsGameCore
 {
@@ -35,46 +36,12 @@ namespace nsGameCore
 
 
 //	OSG core includes
-#include <osg/CullFace>
-#include <osg/Depth>
-#include <osg/FrontFace>
-#include <osg/ClampColor>
-#include <osg/Geode>
-#include <osg/Group>
-#include <osg/MatrixTransform>
-#include <osg/Node>
-#include <osg/Stencil>
-#include <osg/PositionAttitudeTransform>
-#include <osg/ShapeDrawable>
-#include <osg/Texture2D>
-#include <osgText/Text>
 
-#include <osgGA/TrackballManipulator>
-#include <osgGA/KeySwitchMatrixManipulator>
-#include <osgGA/TerrainManipulator>
-#include <osgGA/DriveManipulator>
-#include <osgGA/FlightManipulator>
-#include <osgViewer/ViewerEventHandlers>
 
-//	OSG extra includes
-#include <osgDB/FileUtils>
-#include <osgDB/ReadFile>
-#include <osgDB/WriteFile>	
+
+
 #include <osgViewer/Viewer>
-#include <osg/Texture2D>
-#include <osg/PositionAttitudeTransform>
-#include <osg/PolygonMode>
-#include <osg/BlendFunc>
-#include <osg/Switch>
-#include <osgUtil/Optimizer>
-#include <osgSim/Impostor>
 
-#include <osgShadow/ShadowedScene>
-#include <osgShadow/LightSpacePerspectiveShadowMap>
-
-#include <osgViewer/CompositeViewer>
-#include <osgViewer/Viewer>
-#include <osgViewer/Renderer>
 
 //	Qt stuff
 
@@ -85,6 +52,7 @@ namespace nsGameCore
 QT_FORWARD_DECLARE_CLASS(QtGui)
 QT_FORWARD_DECLARE_CLASS(QCalendarWidget)
 QT_FORWARD_DECLARE_CLASS(QKeyEvent)
+QT_FORWARD_DECLARE_CLASS(QInputEvent)
 QT_FORWARD_DECLARE_CLASS(QString)
 QT_FORWARD_DECLARE_CLASS(QtGui)
 QT_FORWARD_DECLARE_CLASS(QWidget)
@@ -92,24 +60,6 @@ QT_FORWARD_DECLARE_CLASS(QWidget)
 using Qt::WindowFlags;
 
 
-//	silverlining stuff
-//#include "SilverLining/SkySetup.h"
-//#include "SilverLining/AtmosphereReference.h"
-
-//	other stuff
-#include <Common/CommonHelpers.h>
-#include <Common/Visitors/FindAlphaVisitor.h>
-#include <Common/Visitors/BindTexturesVisitor.h>
-#include <Common/Visitors/FindLightsVisitor.h>
-#include <Common/Visitors/FindNodeVisitor.h>
-#include <Common/NodeHelpers.h>
-#include <Common/RenderPass.h>
-//#include <Common/ SpaceMouseManipulator.h>
-#include <Common/SceneSupportData.h>
-
-#include <Filesystem/Directory.h>
-//#include <Common/PickHandler.h>
-//----------
 
 
 class ViewerWidget : public QWidget
@@ -131,7 +81,8 @@ public:
 	
 	QTimer mQTimer;
 
-
+	void keyPressEvent(QKeyEvent * event);
+	void keyReleaseEvent(QKeyEvent* event);
 public:
     ViewerWidget(const nsRenderer::Config& config, QWidget* parent, const char* name =0, WindowFlags flags =0, bool overrideTraits = false);
 
@@ -151,6 +102,8 @@ protected:
 	
 	osg::ref_ptr<osgViewer::GraphicsWindow> mOsgGraphicsWindow;
     
+	osgGA::EventQueue* getEventQueue() const;
+	void setKeyboardModifiers(QInputEvent* event);
     bool mbOverrideTraits;
 
 public slots:

@@ -77,7 +77,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mModelManager->getRegisteredModelNames(buildings);
 	mHUDManager->addMenu("Buildings");
 	mHUDManager->addMenu("Terrain");
-
+	mHUDManager->addMenu("Debug");
 	for (auto iter = buildings.begin(); iter != buildings.end(); ++iter)
 	{
 		mHUDManager->getMenu("Buildings")->addEntry((*iter), boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Place", *iter)));
@@ -85,7 +85,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mHUDManager->getMenu("Terrain")->addEntry("Raise", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Up")));
 	mHUDManager->getMenu("Terrain")->addEntry("Lower", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Down")));
 	mHUDManager->getMenu("Terrain")->addEntry("Level", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Level")));
-	
+	//mHUDManager->getMenu("Debug")->addEntry("Level", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this, "Terrain", "Level")));
 	
 	mGameLogic.reset(new GameLogic(*this));
 

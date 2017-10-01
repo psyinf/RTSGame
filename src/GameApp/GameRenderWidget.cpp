@@ -1,44 +1,109 @@
 #include "GameRenderWidget.h"
 
-#include <QtGui/QDesktopServices>
+#include <GameCore/GameCore.h>
+#include <QKeyEvent>
 #include <QHBoxLayout>
 #include <QMessageBox>
-// #include <QTextStream>
-// #include <QUrl>
 
-#include <osg/ValueObject>
-#include <osgParticle/ParticleEffect>
-#include <osgUtil/SmoothingVisitor>
 #include <osgGA/TrackballManipulator>
-#include <osgGA/FlightManipulator>
 #include <osgGA/KeySwitchMatrixManipulator>
-#include <osgGA/StateSetManipulator>
 #include <osgViewer/ViewerEventHandlers>
 
-#include <boost/assign.hpp>
-#include <boost/bind.hpp>
 
-#include <iomanip>
+class QtKeyboardMap
+{
 
+public:
+	QtKeyboardMap()
+	{
+		mKeyMap[Qt::Key_Escape] = osgGA::GUIEventAdapter::KEY_Escape;
+		mKeyMap[Qt::Key_Delete] = osgGA::GUIEventAdapter::KEY_Delete;
+		mKeyMap[Qt::Key_Home] = osgGA::GUIEventAdapter::KEY_Home;
+		mKeyMap[Qt::Key_Enter] = osgGA::GUIEventAdapter::KEY_KP_Enter;
+		mKeyMap[Qt::Key_End] = osgGA::GUIEventAdapter::KEY_End;
+		mKeyMap[Qt::Key_Return] = osgGA::GUIEventAdapter::KEY_Return;
+		mKeyMap[Qt::Key_PageUp] = osgGA::GUIEventAdapter::KEY_Page_Up;
+		mKeyMap[Qt::Key_PageDown] = osgGA::GUIEventAdapter::KEY_Page_Down;
+		mKeyMap[Qt::Key_Left] = osgGA::GUIEventAdapter::KEY_Left;
+		mKeyMap[Qt::Key_Right] = osgGA::GUIEventAdapter::KEY_Right;
+		mKeyMap[Qt::Key_Up] = osgGA::GUIEventAdapter::KEY_Up;
+		mKeyMap[Qt::Key_Down] = osgGA::GUIEventAdapter::KEY_Down;
+		mKeyMap[Qt::Key_Backspace] = osgGA::GUIEventAdapter::KEY_BackSpace;
+		mKeyMap[Qt::Key_Tab] = osgGA::GUIEventAdapter::KEY_Tab;
+		mKeyMap[Qt::Key_Space] = osgGA::GUIEventAdapter::KEY_Space;
+		mKeyMap[Qt::Key_Delete] = osgGA::GUIEventAdapter::KEY_Delete;
+		mKeyMap[Qt::Key_Alt] = osgGA::GUIEventAdapter::KEY_Alt_L;
+		mKeyMap[Qt::Key_Shift] = osgGA::GUIEventAdapter::KEY_Shift_L;
+		mKeyMap[Qt::Key_Control] = osgGA::GUIEventAdapter::KEY_Control_L;
+		mKeyMap[Qt::Key_Meta] = osgGA::GUIEventAdapter::KEY_Meta_L;
 
+		mKeyMap[Qt::Key_F1] = osgGA::GUIEventAdapter::KEY_F1;
+		mKeyMap[Qt::Key_F2] = osgGA::GUIEventAdapter::KEY_F2;
+		mKeyMap[Qt::Key_F3] = osgGA::GUIEventAdapter::KEY_F3;
+		mKeyMap[Qt::Key_F4] = osgGA::GUIEventAdapter::KEY_F4;
+		mKeyMap[Qt::Key_F5] = osgGA::GUIEventAdapter::KEY_F5;
+		mKeyMap[Qt::Key_F6] = osgGA::GUIEventAdapter::KEY_F6;
+		mKeyMap[Qt::Key_F7] = osgGA::GUIEventAdapter::KEY_F7;
+		mKeyMap[Qt::Key_F8] = osgGA::GUIEventAdapter::KEY_F8;
+		mKeyMap[Qt::Key_F9] = osgGA::GUIEventAdapter::KEY_F9;
+		mKeyMap[Qt::Key_F10] = osgGA::GUIEventAdapter::KEY_F10;
+		mKeyMap[Qt::Key_F11] = osgGA::GUIEventAdapter::KEY_F11;
+		mKeyMap[Qt::Key_F12] = osgGA::GUIEventAdapter::KEY_F12;
+		mKeyMap[Qt::Key_F13] = osgGA::GUIEventAdapter::KEY_F13;
+		mKeyMap[Qt::Key_F14] = osgGA::GUIEventAdapter::KEY_F14;
+		mKeyMap[Qt::Key_F15] = osgGA::GUIEventAdapter::KEY_F15;
+		mKeyMap[Qt::Key_F16] = osgGA::GUIEventAdapter::KEY_F16;
+		mKeyMap[Qt::Key_F17] = osgGA::GUIEventAdapter::KEY_F17;
+		mKeyMap[Qt::Key_F18] = osgGA::GUIEventAdapter::KEY_F18;
+		mKeyMap[Qt::Key_F19] = osgGA::GUIEventAdapter::KEY_F19;
+		mKeyMap[Qt::Key_F20] = osgGA::GUIEventAdapter::KEY_F20;
 
-#include <Common/SceneData.h>
-#include <Common/RenderPass.h>
-#include <Common/PickHandler.h>
-#include <Common/SceneSupportData.h>
-#include <Common/GetHotList.h>
-#include <Common/Material.h>
-#include <Core/MakeInstancedVisitor.h>
-#include <Common/EarthManipulator.h>
-#include <Core/GeometryManager.h>
-#include <Core/EnvironmentInterface.h>
-#include <GameCore/GameCore.h>
+		mKeyMap[Qt::Key_hyphen] = '-';
+		mKeyMap[Qt::Key_Equal] = '=';
 
+		mKeyMap[Qt::Key_division] = osgGA::GUIEventAdapter::KEY_KP_Divide;
+		mKeyMap[Qt::Key_multiply] = osgGA::GUIEventAdapter::KEY_KP_Multiply;
+		mKeyMap[Qt::Key_Minus] = '-';
+		mKeyMap[Qt::Key_Plus] = '+';
 
+		mKeyMap[Qt::Key_Insert] = osgGA::GUIEventAdapter::KEY_KP_Insert;
+		//mKeyMap[Qt::Key_Delete        ] = osgGA::GUIEventAdapter::KEY_KP_Delete;
+	}
 
-using namespace boost::assign;
+	~QtKeyboardMap()
+	{
+	}
 
-#define USE_QT4
+	int remapKey(QKeyEvent* event)
+	{
+		KeyMap::iterator itr = mKeyMap.find(event->key());
+		if (itr == mKeyMap.end())
+		{
+			return int(*(event->text().toLatin1().data()));
+		}
+		else
+			return itr->second;
+	}
+
+private:
+	typedef std::map<unsigned int, int> KeyMap;
+	KeyMap mKeyMap;
+};
+static QtKeyboardMap sQtKeyBoardMap;
+
+void ViewerWidget::keyPressEvent(QKeyEvent * event)
+{
+	setKeyboardModifiers(event);
+	int value = sQtKeyBoardMap.remapKey(event);
+	getEventQueue()->keyPress(value);
+}
+
+void ViewerWidget::keyReleaseEvent(QKeyEvent* event)
+{
+	setKeyboardModifiers(event);
+	int value = sQtKeyBoardMap.remapKey(event);
+	getEventQueue()->keyRelease(value);
+}
 
 ViewerWidget::ViewerWidget(const nsRenderer::Config& config, QWidget* parent, const char* name, WindowFlags f, bool overrideTraits) 
 	:QWidget(parent, f)
@@ -116,16 +181,7 @@ void ViewerWidget::createContext()
 	osgGA::KeySwitchMatrixManipulator* keyswitchManipulator = new osgGA::KeySwitchMatrixManipulator;
 	keyswitchManipulator->addMatrixManipulator( '1', "Trackball", new osgGA::TrackballManipulator() );
 	mRenderCore->getViewerRef()->setCameraManipulator(keyswitchManipulator);
-	
-// 	try 
-// 	{
-// 		keyswitchManipulator->addMatrixManipulator( '5', "SpaceMouse", new nsRenderer::SpaceMouseManipulator );
-// 	}
-// 	catch (const std::exception&)
-// 	{
-// 		std::cerr << "Spacemouse not found\n" << std::endl;
-// 	}
-	
+
 
 	mRenderCore->setup();
 
@@ -139,6 +195,30 @@ void ViewerWidget::createContext()
 	
 }
 
+
+osgGA::EventQueue* ViewerWidget::getEventQueue() const
+{
+	osgGA::EventQueue* eventQueue = mOsgGraphicsWindow->getEventQueue();
+
+	if (eventQueue)
+	{
+		return eventQueue;
+	}
+	else
+	{
+		throw std::runtime_error("Unable to obtain valid event queue");
+	}
+}
+
+void ViewerWidget::setKeyboardModifiers(QInputEvent* event)
+{
+	int modkey = event->modifiers() & (Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier);
+	unsigned int mask = 0;
+	if (modkey & Qt::ShiftModifier) mask |= osgGA::GUIEventAdapter::MODKEY_SHIFT;
+	if (modkey & Qt::ControlModifier) mask |= osgGA::GUIEventAdapter::MODKEY_CTRL;
+	if (modkey & Qt::AltModifier) mask |= osgGA::GUIEventAdapter::MODKEY_ALT;
+	getEventQueue()->getCurrentEventState()->setModKeyMask(mask);
+}
 
 bool ViewerWidget::setupScene( const std::string& model_name )
 {
@@ -194,9 +274,7 @@ void ViewerWidget::updateFrame()
 
 osg::ref_ptr<osg::Group> ViewerWidget::getModelRoot()
 {
-	
 	return mRenderCore->getSubRoot("TERRAIN_ROOT");//->getParent(0);
-	//return mMainRoot;
 }
 
 osg::Camera* ViewerWidget::getCamera() const
