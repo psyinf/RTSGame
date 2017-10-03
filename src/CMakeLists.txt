@@ -14,3 +14,4 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_named_subdirectory(DIRECTORY GameCore FOLDER Core)
 add_named_subdirectory(DIRECTORY GameApp FOLDER App)
+add_named_subdirectory(DIRECTORY TerrainTest FOLDER App)

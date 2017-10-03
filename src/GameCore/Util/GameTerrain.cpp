@@ -5,6 +5,7 @@
 #include <osg/PolygonOffset>
 #include <osg/PolygonMode>
 #include <osg/Material>
+#include <osgTerrain/DisplacementMappingTechnique>
 #include <Common/CustomShader/CustomShaderProgram.h>
 
 
@@ -22,9 +23,12 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 
 
 	osg::HeightField* height_field = osgDB::readHeightFieldFile(height_field_path,options);
-	
-	osg::ref_ptr<osgTerrain::ModifyingTerrainTechnique> terrain_geometry_technique = new osgTerrain::ModifyingTerrainTechnique();
-	terrain_geometry_technique->setFilterMatrixAs(osgTerrain::GeometryTechnique::GAUSSIAN);
+	//osg::ref_ptr<osgTerrain::ModifyingTerrainTechnique> terrain_geometry_technique = new osgTerrain::ModifyingTerrainTechnique();
+	osg::ref_ptr<osgTerrain::DisplacementMappingTechnique> terrain_geometry_technique = new osgTerrain::DisplacementMappingTechnique();
+	//terrain_geometry_technique->setFilterMatrixAs(osgTerrain::GeometryTechnique::GAUSSIAN);
+	mTerrain->getOrCreateStateSet()->setDefine("LIGHTING", osg::StateAttribute::OVERRIDE);
+	mTerrain->getOrCreateStateSet()->setDefine("HEIGHTFIELD_LAYER", osg::StateAttribute::OVERRIDE);
+	mTerrain->getOrCreateStateSet()->setDefine("COMPUTE_DIAGONALS", osg::StateAttribute::OVERRIDE);
 	
 
 	if (!height_field)
@@ -46,7 +50,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	osg::ref_ptr<osgTerrain::HeightFieldLayer> hf_layer = new osgTerrain::HeightFieldLayer(height_field);
 	hf_layer->setLocator(Locator1);
 	hf_layer->setMagFilter(filter);
-	//hf_layer->transform(0,0.1);
+	hf_layer->transform(0,0.01);
 	//create a terrain-tile and add the height field
 	osg::ref_ptr<osgTerrain::TerrainTile> terrain_tile = new osgTerrain::TerrainTile;
 	terrain_tile->setElevationLayer( hf_layer.get() );
