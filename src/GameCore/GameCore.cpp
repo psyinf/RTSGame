@@ -43,6 +43,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	//Todo: from configuration
 	
 	mTerrain.reset(new nsGameCore::Terrain(*this));
+	mTerrain->getTerrainNode()->setNodeMask(0x0000ffff);
 	mTerrain->load("./data/levels/Canyon/canyon.tif" );
 	mrCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
 	mrCore.getMainRoot()->addChild(mrCore.getSubRoot("MAIN_ROOT"));

@@ -146,7 +146,7 @@ nsGameCore::HUDManager::HUDManager( GameCore& game_core ) :mrGameCore(game_core)
 		viewer,
 		config.mScene.mOffscreenResolutionX,
 		config.mScene.mOffscreenResolutionY,
-		0xf0000000,
+		0xffff0000,
 		osgWidget::WindowManager::WM_PICK_DEBUG);
 
 	
@@ -156,7 +156,7 @@ nsGameCore::HUDManager::HUDManager( GameCore& game_core ) :mrGameCore(game_core)
 
 	osg::Camera* camera = osgWidget::createOrthoCamera(config.mScene.mOffscreenResolutionX, config.mScene.mOffscreenResolutionY);
 	camera->addChild(mWindowManager);
-
+	
 	viewer->addEventHandler(new osgWidget::MouseHandler(mWindowManager));
 	//viewer->addEventHandler(new osgWidget::KeyboardHandler(mWindowManager));
 	viewer->addEventHandler(new osgWidget::ResizeHandler(mWindowManager, camera));
@@ -175,7 +175,7 @@ nsGameCore::HUDManager::HUDManager( GameCore& game_core ) :mrGameCore(game_core)
 
 	mWindowManager->resizeAllWindows();
 	//TODO: This fucks up the scene and camera management. 
-	mrGameCore.getRenderCore().getMainRoot()->addChild(camera);
+	mrGameCore.getRenderCore().getSubRoot("MAIN_ROOT")->addChild(camera);
 }
 
 nsGameCore::LabelMenu* nsGameCore::HUDManager::getMenu(const std::string& menu_name)
