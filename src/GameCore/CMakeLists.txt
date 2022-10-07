@@ -9,12 +9,9 @@ add_library(RTSGame::Core ALIAS GameCore)
 target_link_libraries(GameCore
 	PUBLIC
 		Boost::boost
-		Boost::thread
-		Render::Common
-		Render::Core
-		SDK::common
-		Gmtl
-			
+		Boost::headers
+		OPENSCENEGRAPH::osg
+		OPENSCENEGRAPH::osgTerrain
 )
 
 target_include_directories(GameCore INTERFACE

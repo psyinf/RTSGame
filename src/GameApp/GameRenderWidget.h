@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Common/LightManager.h>
+//#include <Common/LightManager.h>
 
 
 #if defined(_MSC_VER) && defined(OSG_DISABLE_MSVC_WARNINGS)
@@ -19,7 +19,7 @@ typedef osgViewer::GraphicsWindowWin32::WindowData WindowData;
 #include <osgGA/StateSetManipulator>
 #include <osgDB/ReadFile>
 
-#include <Core/Core.h>
+//#include <Core/Core.h>
 #include <iostream>
 #include <sstream>
 
@@ -75,7 +75,7 @@ public:
 
 	const std::string&			getResourcePath();
 
-	boost::shared_ptr<nsRenderer::EnvironmentInterface>		getSkyEnv();
+	//boost::shared_ptr<nsRenderer::EnvironmentInterface>		getSkyEnv();
 
 	bool			setupScene(const std::string& model_name);
 	
@@ -84,7 +84,7 @@ public:
 	void keyPressEvent(QKeyEvent * event);
 	void keyReleaseEvent(QKeyEvent* event);
 public:
-    ViewerWidget(const nsRenderer::Config& config, QWidget* parent, const char* name =0, WindowFlags flags =0, bool overrideTraits = false);
+    ViewerWidget( QWidget* parent, const char* name =0, WindowFlags flags =0, bool overrideTraits = false);
 
     // Prevent flicker on Windows Qt
 	QPaintEngine* paintEngine() const 
@@ -92,7 +92,7 @@ public:
 		return 0; 
 	}
 
-	void setConfig(const nsRenderer::Config& config);
+	
 
 protected:
 
@@ -110,9 +110,9 @@ public slots:
 	void updateFrame();
 	
 private:
-	boost::shared_ptr<nsRenderer::Core>				mRenderCore;
-	boost::shared_ptr<nsGameCore::GameCore>			mGameCore;
+	//boost::shared_ptr<nsRenderer::Core>				mRenderCore;
+	std::shared_ptr<nsGameCore::GameCore>			mGameCore;
 	
 
-	nsRenderer::Config mConfig;	
+	
 };

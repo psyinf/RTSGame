@@ -4,7 +4,6 @@
 #include <osgTerrain/Terrain>
 
 #include <osgGA/GUIEventHandler>
-#include "Core/Core.h"
 #include "TerrainTechniques.h"
 
 

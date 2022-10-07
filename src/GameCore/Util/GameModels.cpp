@@ -1,21 +1,22 @@
 #include "GameModels.h"
-#include <boost/bind.hpp>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <algorithm>
 #include <iterator>
-#include "Filesystem/Directory.h"
-#include "FileFormats/XMLSerializer.h"
+//#include "Filesystem/Directory.h"
+//#include "FileFormats/XMLSerializer.h"
 
 #include <osgDB/ReadFile>
 
 #include <boost/algorithm/string.hpp>
-#include <common/CustomShader/CustomShaderProgram.h>
+//#include <common/CustomShader/CustomShaderProgram.h>
 
-
+/*/
 void nsGameCore::GameModel::addPropertyFromNode( nsXML::XMLNode &properties_node, std::string type )
 {
+	 XXX
 	std::vector<nsXML::XMLNode> build_cost_nodes = properties_node.getNodes("Properties/" + type );
 	for (auto iter = build_cost_nodes.begin()
 		;iter != build_cost_nodes.end()
@@ -27,7 +28,9 @@ void nsGameCore::GameModel::addPropertyFromNode( nsXML::XMLNode &properties_node
 		std::string value = node.getAttrib<std::string>("value");
 		getProperties().addProperty(type, name + ":" + value);
 	}
+	
 }
+*/
 
 nsGameCore::GameModel::Type 
 nsGameCore::GameBuilding::getModelType() const
@@ -57,7 +60,7 @@ nsGameCore::GameBuilding::getGraphicalModel()
 	mGraphicalModel = dynamic_cast<osg::Node*>(node->clone(copy_flags));
 	//TODO: move this to a separate function to make it configurable
 	mGraphicalModel->getOrCreateStateSet()->getOrCreateUniform("ConstructionProgress", osg::Uniform::FLOAT)->set(0.0f);
-	nsRenderer::ShaderProgram* program = nsRenderer::ShaderProgramHelpers::loadProgram("data/shaders/Building", nsRenderer::ShaderInfo());
+	// XXX nsRenderer::ShaderProgram* program = nsRenderer::ShaderProgramHelpers::loadProgram("data/shaders/Building", nsRenderer::ShaderInfo());
 	//mGraphicalModel->getOrCreateStateSet()->setAttribute(program, osg::StateAttribute::ON);
 
 	return mGraphicalModel;
@@ -84,7 +87,7 @@ nsGameCore::GameModelManager::GameModelManager( const std::string& path )
 {
 	
 	std::vector<std::string> ret_files;
-	Directory::getFilesInDir(path, ret_files, "*.xml" );
+	// XXX Directory::getFilesInDir(path, ret_files, "*.xml" );
 	for (auto iter = ret_files.begin(); iter != ret_files.end(); ++iter)
 	{
 		boost::shared_ptr<nsGameCore::GameModel> model = GameModelFactory::build(*this, path + "/" + *iter);
@@ -140,6 +143,7 @@ nsGameCore::Properties& nsGameCore::GameModel::getProperties()
 
 void nsGameCore::GameModel::parse( const std::string& model_description_file )
 {
+	/* XXX
 	boost::shared_ptr<nsXML::XMLData> xml_document(new nsXML::XMLData(model_description_file.c_str()));
 	std::string model_path = xml_document->getNode().getValue<std::string>("GameModel/ModelName");
 	std::string model_display_name = xml_document->getNode().getValue<std::string>("GameModel/DisplayName");
@@ -229,7 +233,7 @@ void nsGameCore::GameModel::parse( const std::string& model_description_file )
 	{
 		std::cerr << "Error getting Scale " << e.what();
 	}
-	
+	*/ 
 	
 }
 
@@ -267,8 +271,10 @@ nsGameCore::GameModelFactory::build( nsGameCore::GameModelManager& model_manager
 {
 	try 
 	{
-		boost::scoped_ptr<nsXML::XMLData> xml_document (new nsXML::XMLData(xml_description_file));
+		/* XXX boost::scoped_ptr<nsXML::XMLData> xml_document(new nsXML::XMLData(xml_description_file));
 		const std::string model_type_name = xml_document->getNode().name();
+		*/
+		const std::string model_type_name = "GameModel";
 		if ("GameModel" == model_type_name)
 		{
 			boost::shared_ptr<GameModel> model(new GameBuilding(model_manager, xml_description_file));

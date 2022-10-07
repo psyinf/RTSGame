@@ -1,7 +1,6 @@
 #include "GameCore.h"
 #include "GameArea.h"
 
-#include <Core/Core.h>
 
 #include "Util/GameTerrain.h"
 #include "Util/GameModels.h"
@@ -10,23 +9,18 @@
 #include "GameLogic.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
-#include <Core/StandardHandlers.h>
-#include <Common/CommonHelpers.h>
+
+#include <functional>
+//#include <Core/StandardHandlers.h>
 
 #include <osg/PositionAttitudeTransform>
 
-nsGameCore::GameCore::GameCore( nsRenderer::Core& render_core ) 
-	:mrCore(render_core)
-	,mTextNode(new osg::Geode)
+nsGameCore::GameCore::GameCore( /*nsRenderer::Core& render_core*/ ) 
+	//:mrCore(render_core)
+	:mTextNode(new osg::Geode)
 	
 {
 
-}
-
-nsRenderer::Core& nsGameCore::GameCore::getRenderCore()
-{
-	return mrCore;
 }
 
 void nsGameCore::GameCore::frame()
@@ -45,8 +39,8 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mTerrain.reset(new nsGameCore::Terrain(*this));
 	mTerrain->getTerrainNode()->setNodeMask(0x0000ffff);
 	mTerrain->load("./data/levels/Canyon/canyon.tif" );
-	mrCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
-	mrCore.getMainRoot()->addChild(mrCore.getSubRoot("MAIN_ROOT"));
+	// XXX mrCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
+	// XXX mrCore.getMainRoot()->addChild(mrCore.getSubRoot("MAIN_ROOT"));
 	mModelManager.reset(new nsGameCore::GameModelManager("./data/models"));
 	mGameArea.reset(new nsGameCore::GameArea(*this));
 	
@@ -64,14 +58,12 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	}
 
 	mCurrentEditMode.setMode("DEFAULT");
-	//Add top level HUD
-	//mHUDCamera = nsRenderer::Helpers::createHUDCamera(1024,1024);
 	
-	mrCore.getMainRoot()->addChild(mHUDCamera);
-	nsRenderer::CamResizeHandler* cam_resize_handler = new nsRenderer::CamResizeHandler(mHUDCamera);
-	mrCore.addEventHandler(cam_resize_handler);
-	//mHUDCamera->addChild(mTextNode);
-
+	
+	// XXX mrCore.getMainRoot()->addChild(mHUDCamera);
+	// XXX nsRenderer::CamResizeHandler* cam_resize_handler = new nsRenderer::CamResizeHandler(mHUDCamera);
+	// XXX mrCore.addEventHandler(cam_resize_handler);
+	
 	mHUDManager = boost::shared_ptr<HUDManager>(new HUDManager(*this));
 	//
 	std::vector<std::string> buildings;
@@ -79,23 +71,20 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mHUDManager->addMenu("Buildings");
 	mHUDManager->addMenu("Terrain");
 	mHUDManager->addMenu("Debug");
-	for (auto iter = buildings.begin(); iter != buildings.end(); ++iter)
+/*	for (auto building : buildings)
 	{
-		mHUDManager->getMenu("Buildings")->addEntry((*iter), boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Place", *iter)));
+		mHUDManager->getMenu("Buildings")->addEntry(building, [this,&building]() { this->setModeAndEditMode("Place", building)});
 	}
-	mHUDManager->getMenu("Terrain")->addEntry("Raise", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Up")));
-	mHUDManager->getMenu("Terrain")->addEntry("Lower", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Down")));
-	mHUDManager->getMenu("Terrain")->addEntry("Level", boost::function<void()>(boost::bind(&GameCore::setModeAndEditMode, this,  "Terrain", "Level")));
-
-	
+	mHUDManager->getMenu("Terrain")->addEntry("Raise", [=]() {this->setModeAndEditMode("Terrain", "Up"); });
+	mHUDManager->getMenu("Terrain")->addEntry("Lower", [this]() {this->setModeAndEditMode("Terrain", "Down"); });
+	mHUDManager->getMenu("Terrain")->addEntry("Level", [this]() {this->setModeAndEditMode("Terrain", "Level"); });
+	*/
+	mHUDManager->getMenu("Terrain")->addEntry("Raise", std::function<void()>(std::bind(&GameCore::setModeAndEditMode, this, "Terrain", "Up")));
+	mHUDManager->getMenu("Terrain")->addEntry("Raise", [=]() {this->setModeAndEditMode("Terrain", "Up"); });
 	mGameLogic.reset(new GameLogic(*this));
 
 }
 
-nsGameCore::GameCore::~GameCore()
-{
-
-}
 
 
 
@@ -157,7 +146,7 @@ void nsGameCore::GameCore::placeModel( const CellAdress& address, const std::str
 	pat->setScale(game_model->getModelScale());
 	pat->addChild(game_model->getGraphicalModel());
 	pat->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON); 
-	mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
+	//XXX mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
 	
 	
 	setCellData(address, boost::shared_ptr<nsGameCore::CellData>(new nsGameCore::CellData(address, game_model)));

@@ -5,17 +5,17 @@
 #include <osgUtil/RayIntersector>
 #include <osgDB/WriteFile>
 #include <osgDB/ReadFile>
-#include <gmtl/gmtl.h>
 #include <iostream>
 
 
 osg::Vec3d sampleUniform(float u1, float u2)
 {
-
+/* XXX
 	const float r = gmtl::Math::sqrt(1.0f - u1 * u1);
 	const float phi = 2 * osg::PI * u2;
 	osg::Vec3d result = osg::Vec3d(gmtl::Math::cos(phi) * r, gmtl::Math::sin(phi) * r, u1);	
-	//result = osg::Vec3d(0,0,1);
+	*/
+	osg::Vec3d result = osg::Vec3d(0,0,1);
 	return result;
 
 }
@@ -196,7 +196,7 @@ osg::Vec3i osgTerrain::ModifyingTerrainTechnique::getTilePosition( const osg::Ve
 
 void osgTerrain::ModifyingTerrainTechnique::calculateAmbientApperture()
 {
-	
+	/* XXX
 	HeightFieldLayer* hfl = dynamic_cast<HeightFieldLayer*>( getTerrainTile()->getElevationLayer() );
 	if (hfl)
 	{
@@ -270,19 +270,19 @@ void osgTerrain::ModifyingTerrainTechnique::calculateAmbientApperture()
 						{
 							//TODO:check: this is intersecting point immediately above, which is stupip
 							//might be, that we have to consider slope at the point
-						/*	osg::Vec3d intersection_point = lsi->getFirstIntersection().getWorldIntersectPoint();
-							osg::Vec3d intersection_normal= lsi->getFirstIntersection().getWorldIntersectNormal();
-							osg::Drawable* drawable =  lsi->getFirstIntersection().drawable;
-							osg::Array* vertex_array =drawable->asGeometry()->getVertexArray();
-							osg::Vec3Array* vert_array = dynamic_cast<osg::Vec3Array*>(vertex_array);
+						//	osg::Vec3d intersection_point = lsi->getFirstIntersection().getWorldIntersectPoint();
+						//	osg::Vec3d intersection_normal= lsi->getFirstIntersection().getWorldIntersectNormal();
+						//	osg::Drawable* drawable =  lsi->getFirstIntersection().drawable;
+						//	osg::Array* vertex_array =drawable->asGeometry()->getVertexArray();
+						//	osg::Vec3Array* vert_array = dynamic_cast<osg::Vec3Array*>(vertex_array);
 
-							for (unsigned int i = 0; i < lsi->getFirstIntersection().indexList.size(); ++i)
-							{
-								osg::Vec3f vertex = (*vert_array)[lsi->getFirstIntersection().indexList[i]];
+						//	for (unsigned int i = 0; i < lsi->getFirstIntersection().indexList.size(); ++i)
+						//	{
+						//		osg::Vec3f vertex = (*vert_array)[lsi->getFirstIntersection().indexList[i]];
 							//	std::cout << i;
-							}
+						//	}
 							//std::cout << "blocked by " << std::endl;
-							*/
+							
 						}
 					}
 					//get the "visibility" term
@@ -310,7 +310,7 @@ void osgTerrain::ModifyingTerrainTechnique::calculateAmbientApperture()
 		osg::Uniform* sampler = new osg::Uniform("ambient", 1);
 		getTerrainTile()->getOrCreateStateSet()->addUniform(sampler);
 
-	}
+	}*/
 }
 
 void osgTerrain::ModifyingTerrainTechnique::generateGeometry( osgTerrain::GeometryTechnique::BufferData& buffer,osgTerrain::Locator* masterLocator, const osg::Vec3d& centerModel )

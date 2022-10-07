@@ -5,10 +5,7 @@
 #include <boost/lexical_cast.hpp>
 #include "Properties.h"
 
-namespace nsXML
-{
-	class XMLNode;
-};
+
 
 namespace nsGameCore{
 class GameModel;
@@ -82,7 +79,7 @@ public:
 	osg::Vec3 getModelScale() const;
 protected:
 	void loadGraphicalModel(const std::string& path);
-	void addPropertyFromNode( nsXML::XMLNode &properties_node, std::string type );
+	//XXX void addPropertyFromNode( nsXML::XMLNode &properties_node, std::string type );
 protected:
 	GameModelManager&		mrGameModelManager;	
 	std::string				mModelTypeName;

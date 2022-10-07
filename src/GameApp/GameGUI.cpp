@@ -6,9 +6,9 @@
 
 
 
-DesktopMainWindow::DesktopMainWindow(nsRenderer::Config& config, std::string& filename, bool viewer_mode, int dock_pos)
-: mConfig(config)
-, mModelToLoadByArg(filename)
+DesktopMainWindow::DesktopMainWindow( std::string& filename, bool viewer_mode, int dock_pos)
+
+: mModelToLoadByArg(filename)
 , ui(new Ui::PilotDriverGUI)
 , mFullScreen(viewer_mode)
 {
@@ -86,7 +86,7 @@ void DesktopMainWindow::initUi()
 {
 	ui->setupUi(this);
 	
-	mOsgViewerWidget = new ViewerWidget(mConfig, this, 0, 0, false );
+	mOsgViewerWidget = new ViewerWidget( this, 0, 0, false );
 	
  	this->centralWidget()->setLayout(new QVBoxLayout);
 

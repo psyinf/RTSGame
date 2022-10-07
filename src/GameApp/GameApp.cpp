@@ -46,16 +46,16 @@ int main( int argc, char** argv )
 	}
 	//Matrix_Test();
 
-
-	nsRenderer::Config config;
+	/* XXX
+	//nsRenderer::Config config;
 	//config.save("MainViewer.ini");
 	
 	if (!config.load(config_name))
 	{
 		config.save(config_name);
 	}
-
-	DesktopMainWindow* dialog = new DesktopMainWindow(config, file_name, viewer_mode, dock_pos);
+	*/
+	DesktopMainWindow* dialog = new DesktopMainWindow( file_name, viewer_mode, dock_pos);
 	//dialog->setGeometry( config.mWindowProps.mStartX, config.mWindowProps.mStartY, config.mWindowProps.mWidth, config.mWindowProps.mHeight );
 	dialog->show();
 

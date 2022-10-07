@@ -3,7 +3,8 @@
 #include <osgWidget/Box>
 #include <osgWidget/Input>
 #include <osgWidget/ViewerEventHandlers>
-#include <boost/function.hpp>
+
+#include <functional>
 
 namespace nsGameCore{
 
@@ -11,7 +12,7 @@ class GameCore;
 
 struct NamedLabel: public osgWidget::Label 
 {
-    NamedLabel(const std::string& label, const boost::function<void()>& button_pressed_callback);
+    NamedLabel(const std::string& label, const std::function<void()>& button_pressed_callback);
 	
 	NamedLabel(const std::string& label);
 
@@ -23,7 +24,7 @@ struct NamedLabel: public osgWidget::Label
 
     bool mouseLeave(double, double, const osgWidget::WindowManager*);
 protected:
-	boost::function<void()> mButtonPressedCallback;
+	std::function<void()> mButtonPressedCallback;
 };
 
 class LabelMenu: public NamedLabel 
@@ -34,7 +35,7 @@ protected:
 public:
     LabelMenu(const std::string& label);
 
-	void addEntry(const std::string& text, boost::function<void()>& button_pressed );
+	void addEntry(const std::string& text, std::function<void()> button_pressed );
 
     void managed(osgWidget::WindowManager* wm);
 

@@ -6,7 +6,7 @@
 #include <osg/PolygonMode>
 #include <osg/Material>
 #include <osgTerrain/DisplacementMappingTechnique>
-#include <Common/CustomShader/CustomShaderProgram.h>
+//#include <Common/CustomShader/CustomShaderProgram.h>
 
 
 osg::ref_ptr<osg::Group> nsGameCore::Terrain::getTerrainNode()
@@ -72,7 +72,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	
 	osg::ref_ptr<osgGA::EventHandler> pick_handler = new nsGameCore::PickHandler(mrGameCore);
 	
-	mrGameCore.getRenderCore().addEventHandler(pick_handler);
+	//XXX mrGameCore.getRenderCore().addEventHandler(pick_handler);
 
 	//////////////////////////////////////////////////////////////////////////
 

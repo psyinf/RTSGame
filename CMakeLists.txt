@@ -1,23 +1,48 @@
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
-project (RTSGame CXX)
+cmake_minimum_required(VERSION 3.21)#
+project(RTSGame VERSION 1.0.0 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_DEBUG_POSTFIX _d)
+set(CMAKE_RELWITHDEBINFO_POSTFIX _rd)
+
+set(PROJECT_NAMESPACE "RTSGame")			# namespace for target aliases in this project
+set(PROJECT_EXPORT_NAME "RTSGame")			# export name to be used by install() and downstream find_package()
+set(PROJECT_INSTALL_PREFIX "RTSGame")		# folder 'prefix' for installed includes and libs
+
+# Run conan install automatically, or display warning if conan is not installed
+include(cmake/conan_config.cmake)
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+include(cmake/helpers.cmake)
+
+install(EXPORT ${PROJECT_EXPORT_NAME} 
+	FILE
+		${PROJECT_EXPORT_NAME}Targets.cmake
+	NAMESPACE
+		${PROJECT_NAMESPACE}::
+	DESTINATION
+		${CMAKE_INSTALL_ARCHIVEDIR}/cmake/${PROJECT_EXPORT_NAME}
+	COMPONENT
+		${DEVELOP_COMPONENT}
+)
 
 list(APPEND CMAKE_MODULE_PATH
-	"${CMAKE_SOURCE_DIR}/CMakeModules/"
-	"$ENV{ES_CMAKE_MODULES}/"
+	"${CMAKE_SOURCE_DIR}/cmake/"
 )
-include(Setup)
 
-SDK_add_prefix_paths(USED_ENVIRONMENTS SDK RENDER)
-SDK_setup_defaults()
-SDK_Setup_boost()
-
-
-
-
-# the flag and definition changes should really be set in the targets
-set(ENH_INSTRUCTION_SET AVX)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:${ENH_INSTRUCTION_SET} /D NOMINMAX /MP /Gm- /Ob2")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MD /Zi /O2 /Ob1 /DNDEBUG /arch:${ENH_INSTRUCTION_SET} /MP /Gm-")
 
 add_subdirectory(src)
+
+add_custom_target( conan-install ALL COMMAND conan install ${CMAKE_SOURCE_DIR}/conanfile.py -if ${CMAKE_INSTALL_PREFIX} -s build_type=$<CONFIG> DEPENDS install)       
+
+#for now
+install(DIRECTORY
+		data/
+	DESTINATION
+		${CMAKE_INSTALL_BINDIR}/data
+	COMPONENT
+		${RUNTIME_COMPONENT}
+)
+
 

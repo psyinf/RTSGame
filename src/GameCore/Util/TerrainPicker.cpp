@@ -2,7 +2,7 @@
 #include <GameCore/GameCore.h>
 #include <GameCore/GameArea.h>
 #include "TerrainTechniques.h"
-#include <Core/Core.h>
+
 #include "GameModels.h"
 
 #include <osgTerrain/Terrain>
@@ -294,7 +294,7 @@ nsGameCore::PickHandler::PickHandler(nsGameCore::GameCore& game_core)
 
 	
 	osg::Geode* selection_geometry = createFaceSelector();
-	mrGameCore.getRenderCore().getSubRoot("MODEL_ROOT")->addChild(selection_geometry);
+	//XXX mrGameCore.getRenderCore().getSubRoot("MODEL_ROOT")->addChild(selection_geometry);
 }
 
 void nsGameCore::PickHandler::getFace(const osgUtil::LineSegmentIntersector::Intersection& intersection )

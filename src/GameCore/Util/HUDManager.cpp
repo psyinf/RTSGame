@@ -1,8 +1,6 @@
 #pragma once
 #include "HUDManager.h"
 #include "../GameCore.h"
-#include "Common/Config.h"
-#include "Core/Core.h"
 
 bool nsGameCore::NamedLabel::mouseLeave( double, double, const osgWidget::WindowManager* )
 {
@@ -25,7 +23,7 @@ bool nsGameCore::NamedLabel::mousePush( double, double, const osgWidget::WindowM
 	return true;
 }
 
-nsGameCore::NamedLabel::NamedLabel( const std::string& label,  const boost::function<void()>&  button_press_callback ) 
+nsGameCore::NamedLabel::NamedLabel( const std::string& label,  const std::function<void()>&  button_press_callback ) 
 	:osgWidget::Label("", "")
 	,mButtonPressedCallback(button_press_callback)
 {
@@ -110,7 +108,7 @@ nsGameCore::LabelMenu::LabelMenu( const std::string&  label )
 	setColor(0.8f, 0.8f, 0.8f, 0.1f);
 }
 
-void nsGameCore::LabelMenu::addEntry( const std::string& text, boost::function<void()>& button_pressed )
+void nsGameCore::LabelMenu::addEntry( const std::string& text, std::function<void()> button_pressed )
 {
 	_window->addWidget(new NamedLabel(text, button_pressed));
 	_window->show();
@@ -139,13 +137,13 @@ nsGameCore::HUDManager::~HUDManager()
 
 nsGameCore::HUDManager::HUDManager( GameCore& game_core ) :mrGameCore(game_core)
 {
-	osgViewer::Viewer* viewer = game_core.getRenderCore().getViewerRef();
-	nsRenderer::Config config = game_core.getRenderCore().getConfigRef();
+	osgViewer::Viewer* viewer = nullptr;//XXXgame_core.getRenderCore().getViewerRef();
+	//XXX nsRenderer::Config config = game_core.getRenderCore().getConfigRef();
 
 	mWindowManager = new osgWidget::WindowManager(
 		viewer,
-		config.mScene.mOffscreenResolutionX,
-		config.mScene.mOffscreenResolutionY,
+		2048, //XXX config.mScene.mOffscreenResolutionX, 
+		2048,//XXX config.mScene.mOffscreenResolutionY,
 		0xffff0000,
 		osgWidget::WindowManager::WM_PICK_DEBUG);
 
@@ -154,7 +152,7 @@ nsGameCore::HUDManager::HUDManager( GameCore& game_core ) :mrGameCore(game_core)
 
 	//box->setOrigin(200.0f, 200.0f);
 
-	osg::Camera* camera = osgWidget::createOrthoCamera(config.mScene.mOffscreenResolutionX, config.mScene.mOffscreenResolutionY);
+	osg::Camera* camera = osgWidget::createOrthoCamera(2048, 2048);
 	camera->addChild(mWindowManager);
 	
 	viewer->addEventHandler(new osgWidget::MouseHandler(mWindowManager));
@@ -175,7 +173,7 @@ nsGameCore::HUDManager::HUDManager( GameCore& game_core ) :mrGameCore(game_core)
 
 	mWindowManager->resizeAllWindows();
 	//TODO: This fucks up the scene and camera management. 
-	mrGameCore.getRenderCore().getSubRoot("MAIN_ROOT")->addChild(camera);
+	//XXX mrGameCore.getRenderCore().getSubRoot("MAIN_ROOT")->addChild(camera);
 }
 
 nsGameCore::LabelMenu* nsGameCore::HUDManager::getMenu(const std::string& menu_name)

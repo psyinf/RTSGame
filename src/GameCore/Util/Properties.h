@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace nsGameCore
 {

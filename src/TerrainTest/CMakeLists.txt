@@ -16,10 +16,8 @@ add_executable(${APP_NAME}
 target_link_libraries(${APP_NAME}
 	PRIVATE
 		RTSGame::Core		
-		Render::Core
-		Render::Common
-		OSG::osgWidget
-		OSG::osgFX
+		OPENSCENEGRAPH::osgWidget
+		OPENSCENEGRAPH::osgFX
 )
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" 
@@ -30,9 +28,7 @@ target_include_directories(${APP_NAME} PRIVATE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
-install(TARGETS ${APP_NAME}
-	RUNTIME DESTINATION bin
-	LIBRARY DESTINATION lib/${PROJECT_INSTALL_PREFIX}
-	ARCHIVE DESTINATION lib/${PROJECT_INSTALL_PREFIX}
-)
 
+install(TARGETS ${APP_NAME}
+        CONFIGURATIONS Debug Release RelWithDebInfo 
+        RUNTIME DESTINATION bin)	

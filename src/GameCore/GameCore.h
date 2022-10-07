@@ -162,8 +162,8 @@ protected:
 class GameCore
 {
 public:
-	GameCore(nsRenderer::Core& render_core);
-	~GameCore();
+	GameCore();
+	~GameCore() = default;
 
 	void setup(const std::string& configuration);
 
@@ -208,7 +208,7 @@ public:
 	Properties& getProperties();
 protected:
 	EditMode											mCurrentEditMode;
-	nsRenderer::Core&									mrCore;
+	
 	boost::shared_ptr<nsGameCore::Terrain>				mTerrain;
 	boost::shared_ptr<nsGameCore::GameArea>				mGameArea;
 	boost::shared_ptr<nsGameCore::GameModelManager>		mModelManager;
