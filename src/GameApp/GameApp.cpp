@@ -44,17 +44,7 @@ int main( int argc, char** argv )
 		std::cout << cmd_params << "\n";
 		return 1;
 	}
-	//Matrix_Test();
 
-	/* XXX
-	//nsRenderer::Config config;
-	//config.save("MainViewer.ini");
-	
-	if (!config.load(config_name))
-	{
-		config.save(config_name);
-	}
-	*/
 	DesktopMainWindow* dialog = new DesktopMainWindow( file_name, viewer_mode, dock_pos);
 	//dialog->setGeometry( config.mWindowProps.mStartX, config.mWindowProps.mStartY, config.mWindowProps.mWidth, config.mWindowProps.mHeight );
 	dialog->show();

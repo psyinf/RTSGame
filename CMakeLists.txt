@@ -16,16 +16,7 @@ include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 include(cmake/helpers.cmake)
 
-install(EXPORT ${PROJECT_EXPORT_NAME} 
-	FILE
-		${PROJECT_EXPORT_NAME}Targets.cmake
-	NAMESPACE
-		${PROJECT_NAMESPACE}::
-	DESTINATION
-		${CMAKE_INSTALL_ARCHIVEDIR}/cmake/${PROJECT_EXPORT_NAME}
-	COMPONENT
-		${DEVELOP_COMPONENT}
-)
+
 
 list(APPEND CMAKE_MODULE_PATH
 	"${CMAKE_SOURCE_DIR}/cmake/"

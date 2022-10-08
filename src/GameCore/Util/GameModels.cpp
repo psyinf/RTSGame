@@ -11,6 +11,7 @@
 #include <osgDB/ReadFile>
 
 #include <boost/algorithm/string.hpp>
+#include <ranges>
 //#include <common/CustomShader/CustomShaderProgram.h>
 
 /*/
@@ -70,11 +71,8 @@ nsGameCore::GameBuilding::getGraphicalModel()
 
 void nsGameCore::GameModelManager::getRegisteredModelNames( std::vector<std::string>& model_names )
 {
-	std::transform(mGameModelMap.begin(), 
-		mGameModelMap.end(), 
-		std::back_inserter(model_names),
-		boost::bind(&GameModelMap::value_type::first, _1)
-	);
+	auto kv = std::views::keys(mGameModelMap);
+	model_names = std::vector<std::string>{ kv.begin(), kv.end() };
 }
 
 nsGameCore::GameModelManager::~GameModelManager()
