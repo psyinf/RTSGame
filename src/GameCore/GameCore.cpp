@@ -1,6 +1,6 @@
 #include "GameCore.h"
 #include "GameArea.h"
-
+#include "RenderCore/RenderCore.h"
 
 #include "Util/GameTerrain.h"
 #include "Util/GameModels.h"
@@ -15,10 +15,9 @@
 
 #include <osg/PositionAttitudeTransform>
 
-nsGameCore::GameCore::GameCore( /*nsRenderer::Core& render_core*/ ) 
-	//:mrCore(render_core)
-	:mTextNode(new osg::Geode)
-	
+nsGameCore::GameCore::GameCore(  renderer::RenderCore& render_core ) 
+	:mrRenderCore(render_core)
+
 {
 
 }
@@ -39,8 +38,8 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mTerrain.reset(new nsGameCore::Terrain(*this));
 	mTerrain->getTerrainNode()->setNodeMask(0x0000ffff);
 	mTerrain->load("./data/levels/Canyon/canyon.tif" );
-	// XXX mrCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
-	// XXX mrCore.getMainRoot()->addChild(mrCore.getSubRoot("MAIN_ROOT"));
+    mrRenderCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
+    mrRenderCore.getMainRoot()->addChild(mrRenderCore.getSubRoot("MAIN_ROOT"));
 	mModelManager.reset(new nsGameCore::GameModelManager("./data/models"));
 	mGameArea.reset(new nsGameCore::GameArea(*this));
 	
@@ -52,15 +51,15 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	
 	std::vector<std::string> model_names;
 	mModelManager->getRegisteredModelNames(model_names);
-	for (auto iter = model_names.begin(); iter != model_names.end(); ++iter)
+	for (const auto& model : model_names)
 	{
-		mCurrentEditMode.addSubMode("PLACE", *iter);
+		mCurrentEditMode.addSubMode("PLACE", model);
 	}
 
 	mCurrentEditMode.setMode("DEFAULT");
 	
 	
-	// XXX mrCore.getMainRoot()->addChild(mHUDCamera);
+	mrRenderCore.getMainRoot()->addChild(mHUDCamera);
 	// XXX nsRenderer::CamResizeHandler* cam_resize_handler = new nsRenderer::CamResizeHandler(mHUDCamera);
 	// XXX mrCore.addEventHandler(cam_resize_handler);
 	
@@ -72,7 +71,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mHUDManager->addMenu("Terrain");
 	mHUDManager->addMenu("Debug");
 /*	for (auto building : buildings)
-	{
+	{ XXX
 		mHUDManager->getMenu("Buildings")->addEntry(building, [this,&building]() { this->setModeAndEditMode("Place", building)});
 	}
 	mHUDManager->getMenu("Terrain")->addEntry("Raise", [=]() {this->setModeAndEditMode("Terrain", "Up"); });
@@ -146,7 +145,7 @@ void nsGameCore::GameCore::placeModel( const CellAdress& address, const std::str
 	pat->setScale(game_model->getModelScale());
 	pat->addChild(game_model->getGraphicalModel());
 	pat->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON); 
-	//XXX mrCore.getSubRoot("MODEL_ROOT")->addChild(pat);
+	mrRenderCore.getSubRoot("MODEL_ROOT")->addChild(pat);
 	
 	
 	setCellData(address, boost::shared_ptr<nsGameCore::CellData>(new nsGameCore::CellData(address, game_model)));
@@ -337,7 +336,7 @@ boost::shared_ptr<nsGameCore::HUDManager> nsGameCore::GameCore::getHUDManager()
 	return mHUDManager;
 }
 
-boost::shared_ptr<nsGameCore::GameArea> nsGameCore::GameCore::getGameArea()
+std::shared_ptr<nsGameCore::GameArea> nsGameCore::GameCore::getGameArea()
 {
 	return mGameArea;
 }

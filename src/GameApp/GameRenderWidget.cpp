@@ -1,6 +1,7 @@
 #include "GameRenderWidget.h"
 
 #include <GameCore/GameCore.h>
+#include <RenderCore/RenderCore.h>
 #include <QKeyEvent>
 #include <QHBoxLayout>
 #include <QMessageBox>
@@ -86,7 +87,7 @@ public:
 	}
 
 private:
-	typedef std::map<unsigned int, int> KeyMap;
+	using KeyMap = std::map<unsigned int, int>;
 	KeyMap mKeyMap;
 };
 static QtKeyboardMap sQtKeyBoardMap;
@@ -111,6 +112,7 @@ ViewerWidget::ViewerWidget( QWidget* parent, const char* name, WindowFlags f, bo
 {
 	try 
 	{
+        mRenderCore = std::make_shared<renderer::RenderCore>();
 		// set up the OpenGL context for an OSG window
 //		setLayout(new QHBoxLayout);
 		createContext();
@@ -162,26 +164,26 @@ void ViewerWidget::createContext()
     osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits.get());
     mOsgGraphicsWindow = dynamic_cast<osgViewer::GraphicsWindow*>(gc.get());
 
-    /* XXX
-	mRenderCore.reset(new nsRenderer::Core(mConfig));
-	mRenderCore->setStatsHandler(new osgViewer::StatsHandler());
+
+
+	//XXX mRenderCore->setStatsHandler(new osgViewer::StatsHandler());
     
 	    
-	mRenderCore->getViewerRef()->getCamera()->setGraphicsContext( mOsgGraphicsWindow );
-	mRenderCore->getViewerRef()->getCamera()->setViewport( new osg::Viewport(0,0,traits->width,traits->height) );
-	mRenderCore->getViewerRef()->addEventHandler( new osgGA::StateSetManipulator() );
-	mRenderCore->getViewerRef()->addEventHandler( new osgViewer::ThreadingHandler() );
+	mRenderCore->getViewer()->getCamera()->setGraphicsContext( mOsgGraphicsWindow );
+    mRenderCore->getViewer()->getCamera()->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));
+    mRenderCore->getViewer()->addEventHandler(new osgGA::StateSetManipulator());
+    mRenderCore->getViewer()->addEventHandler(new osgViewer::ThreadingHandler());
 
-	mRenderCore->getViewerRef()->setKeyEventSetsDone( 0 );
-	mRenderCore->getViewerRef()->setQuitEventSetsDone( false );
-	mRenderCore->getViewerRef()->getCamera()->setAllowEventFocus(true);
-	*/
+	mRenderCore->getViewer()->setKeyEventSetsDone(0);
+    mRenderCore->getViewer()->setQuitEventSetsDone(false);
+    mRenderCore->getViewer()->getCamera()->setAllowEventFocus(true);
+	
 	osgGA::KeySwitchMatrixManipulator* keyswitchManipulator = new osgGA::KeySwitchMatrixManipulator;
 	keyswitchManipulator->addMatrixManipulator( '1', "Trackball", new osgGA::TrackballManipulator() );
-	//XXX mRenderCore->getViewerRef()->setCameraManipulator(keyswitchManipulator);
+    mRenderCore->getViewer()->setCameraManipulator(keyswitchManipulator);
 
 
-	//XXX mRenderCore->setup();
+	mRenderCore->setup();
 
 
 
@@ -217,12 +219,12 @@ void ViewerWidget::setKeyboardModifiers(QInputEvent* event)
 	if (modkey & Qt::ControlModifier) mask |= osgGA::GUIEventAdapter::MODKEY_CTRL;
 	if (modkey & Qt::AltModifier) mask |= osgGA::GUIEventAdapter::MODKEY_ALT;
 	getEventQueue()->getCurrentEventState()->setModKeyMask(mask);
-	std::cout << "mod" << mask <<" \n";
 }
 
 bool ViewerWidget::setupScene( const std::string& model_name )
 {
-	osg::ref_ptr<osg::Node> loaded_scene = nullptr; //XXX mRenderCore->loadScene(model_name, true);
+    osg::ref_ptr<osg::Node> loaded_scene = osgDB::readNodeFile(model_name);
+    
 	if (loaded_scene)
 	{
 		return true;
@@ -234,15 +236,11 @@ bool ViewerWidget::setupScene( const std::string& model_name )
 
 const std::string& ViewerWidget::getResourcePath()
 {
-	return "data";
+    static std::string respath = "data";
+    return respath;
 	//XXX	return mRenderCore->getConfigRef().mEnvironment.mResourcePath;
 }
 
-osgViewer::View* ViewerWidget::getView() const
-{
-	return nullptr;
-	//XXX return mRenderCore->getViewerRef().get();
-}
 
 void ViewerWidget::updateFrame()
 {
@@ -250,7 +248,7 @@ void ViewerWidget::updateFrame()
 	{
 		try
 		{
-			mGameCore.reset(new nsGameCore::GameCore(/*XXX mRenderCore.get()*/));
+			mGameCore = std::make_shared<nsGameCore::GameCore>(*mRenderCore);
 			mGameCore->setup("GameConfig.ini");
 		}
 		catch (const std::exception& e)
@@ -262,7 +260,7 @@ void ViewerWidget::updateFrame()
 	try 
 	{
 		mGameCore->frame();
-		//XXX mRenderCore->frame();
+		mRenderCore->frame();
 	}
 	catch (const std::exception& e)
 	{
@@ -273,18 +271,16 @@ void ViewerWidget::updateFrame()
 
 osg::ref_ptr<osg::Group> ViewerWidget::getModelRoot()
 {
-	return nullptr;
-	//XXX return mRenderCore->getSubRoot("TERRAIN_ROOT");//->getParent(0);
+	return mRenderCore->getSubRoot("TERRAIN_ROOT");
 }
 
 osg::Camera* ViewerWidget::getCamera() const
 {
-	return nullptr;
-	//XXX return mRenderCore->getViewerRef()->getCamera();
+	 return mRenderCore->getViewer()->getCamera();
 }
 
-/*XXX
-void ViewerWidget::setConfig( const nsRenderer::Config& config )
+
+void ViewerWidget::setup()
 {
 	try 
 	{
@@ -305,4 +301,4 @@ void ViewerWidget::setConfig( const nsRenderer::Config& config )
 		QMessageBox::warning(this, "Error","Error setting up ViewerWidget: \n" + QString(e.what()) );
 	}
 }
-*/
+

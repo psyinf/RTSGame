@@ -11,9 +11,9 @@
 #include <osg/Camera>
 #include <osgText/Text>
 
-namespace nsRenderer
+namespace renderer
 {
-	class Core;
+	class RenderCore;
 }
 namespace nsGameCore{
 
@@ -162,7 +162,7 @@ protected:
 class GameCore
 {
 public:
-	GameCore();
+	GameCore(renderer::RenderCore& renderCore);
 	~GameCore() = default;
 
 	void setup(const std::string& configuration);
@@ -177,7 +177,7 @@ public:
 	
 
 
-	nsRenderer::Core& getRenderCore();
+	//nsRenderer::Core& getRenderCore();
 
 	nsGameCore::GameModelManager& getModelManager();
 	
@@ -203,28 +203,29 @@ public:
 	
 	boost::shared_ptr<nsGameCore::HUDManager> getHUDManager();
 
-	boost::shared_ptr<nsGameCore::GameArea>	getGameArea();
+	std::shared_ptr<nsGameCore::GameArea>	getGameArea();
 
 	Properties& getProperties();
 protected:
 	EditMode											mCurrentEditMode;
 	
-	boost::shared_ptr<nsGameCore::Terrain>				mTerrain;
-	boost::shared_ptr<nsGameCore::GameArea>				mGameArea;
-	boost::shared_ptr<nsGameCore::GameModelManager>		mModelManager;
-	boost::shared_ptr<nsGameCore::GameLogic>			mGameLogic;
+	renderer::RenderCore&								mrRenderCore;
+	std::shared_ptr<nsGameCore::Terrain>				mTerrain;
+	std::shared_ptr<nsGameCore::GameArea>				mGameArea;
+	std::shared_ptr<nsGameCore::GameModelManager>		mModelManager;
+	std::shared_ptr<nsGameCore::GameLogic>			mGameLogic;
 
 
 	//those HUD things should be refactored to a separate module
 	osg::ref_ptr<osg::Camera>							mHUDCamera;
 	std::map<std::string, osg::ref_ptr<osgText::Text>> mHUDTextElements;
-	osg::ref_ptr<osg::Geode> mTextNode;
+	
 	boost::shared_ptr<nsGameCore::HUDManager>			mHUDManager;
 
 	std::map<std::string, NamedValue>					mNamedValues;
 	Properties											mProperties;
-
-	
+private:
+	osg::ref_ptr<osg::Geode> mTextNode = new osg::Geode;
 };
 
 

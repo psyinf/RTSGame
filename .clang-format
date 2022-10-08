@@ -1,0 +1,190 @@
+
+BasedOnStyle: LLVM
+
+Language: Cpp
+Standard: Latest
+
+AccessModifierOffset: -4
+
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
+AlignEscapedNewlines: Right
+AlignOperands: AlignAfterOperator
+AlignTrailingComments: true
+
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+AlwaysBreakTemplateDeclarations: MultiLine
+
+BinPackArguments: true
+BinPackParameters: true
+
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+BreakBeforeBraces: Custom
+
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+
+ColumnLimit: 0
+CompactNamespaces: true
+Cpp11BracedListStyle: true
+
+FixNamespaceComments: true
+
+IncludeBlocks: Regroup
+IncludeCategories:
+# Render
+  - Regex:           '^<(CompilerLib|CompilerUtils|VPBCompilerLib)/.*'
+    Priority:        560
+  - Regex:           '^<(Core)/.*'	#add Common, once it is prepended with "Render"
+    Priority:        570
+# GUISDK
+  - Regex:           '^<GUISDK/(PluginInterfaces|MapView)/.*'
+    Priority:        580
+  - Regex:           '^<GUISDK/ModuleInterfaces/.*'
+    Priority:        590
+  - Regex:           '^<GUISDK/(Base|Common|Core)/.*'
+    Priority:        600
+# ESDK
+  - Regex:           '^<(AutoScoring)/.*'
+    Priority:        660
+  - Regex:           '^<(EntityDebugger)/.*'
+    Priority:        670
+  - Regex:           '^<(GenericAgentDriver|ModelPartDriver|MultiDeviceDriver|PassiveTrackDriver|PhysxAgentDriver|RTDDriver)/.*'
+    Priority:        680
+  - Regex:           '^<(EngineDriver)/.*'
+    Priority:        690
+  - Regex:           '^<(BallisticSystem|GenericBallisticLib)/.*'
+    Priority:        700
+  - Regex:           '^<(DISSystem|KDISSystem)/.*'
+    Priority:        705
+  - Regex:           '^<(EffectSystem)/.*'
+    Priority:        710
+  - Regex:           '^<(LoggingSystem)/.*'
+    Priority:        715
+  - Regex:           '^<(MilitarySystem)/.*'
+    Priority:        720
+  - Regex:           '^<(MissionScriptSystem)/.*'
+    Priority:        725
+  - Regex:           '^<(PhysicsSystem)/.*'
+    Priority:        730
+  - Regex:           '^<(RegionSensorSystem)/.*'
+    Priority:        735
+  - Regex:           '^<(RTDynamicsSystem)/.*'
+    Priority:        740
+  - Regex:           '^<(SensorSystem)/.*'
+    Priority:        745
+  - Regex:           '^<(Engine(Common|Interface)|EntityManager|Scheduler)/.*'
+    Priority:        800
+  - Regex:           '^<(collisionAPI|DBInfo|DiGuyData|fQueryDB|GeoDB)/.*'
+    Priority:        810
+  - Regex:           '^<(ADSB_API)/.*'
+    Priority:        820
+  - Regex:           '^<(common)/.*'
+    Priority:        830
+  - Regex:           '^<(IGInterface)/.*'
+    Priority:        840
+  - Regex:           '^<SWRM(Common|Lib|ServerLib)/.*'
+    Priority:        850
+# 3rd party
+  - Regex:           '^<boost.*'
+    Priority:        1000
+  - Regex:           '^<exprtk.*'
+    Priority:        1010
+  - Regex:           '^<gdal*.*'
+    Priority:        1015
+  - Regex:           '^<GeographicLib.*'
+    Priority:        1020
+  - Regex:           '^<gmtl/.*'
+    Priority:        1030
+  - Regex:           '^<json.*'
+    Priority:        1040
+  - Regex:           '^<KDIS/.*'
+    Priority:        1050
+  - Regex:           '^<lua\..*'
+    Priority:        1052
+  - Regex:           '^<LuaB.*'
+    Priority:        1060
+  - Regex:           '^<OIS.*'
+    Priority:        1070
+  - Regex:           '^<(osg|osgDB|osgGA|osgParticle|osgShadow|osgSim|osgTerrain|osgText|osgUtil|osgViewer)/.*'
+    Priority:        1075
+  - Regex:           '^<pslog/.*'
+    Priority:        1078
+  - Regex:           '^<(Px|vehicle/).*'
+    Priority:        1080
+# prevent <queue> from ending up in Qt category 
+  - Regex:           '^<queue>'
+    Priority:        9000
+#
+  - Regex:           '^<Q.*'
+    Priority:        1090
+  - Regex:           '^<(RTD|EWLib|FixedWingLibCGF|RotorLibCGF|WeaponLib)/.*'
+    Priority:        1100
+  - Regex:           '^<tinyxml2.*'
+    Priority:        1110
+  - Regex:           '^<vpb/.*'
+    Priority:        1120
+# System
+  - Regex:           '^<Windows.h>'
+    Priority:        10000
+# STL
+  - Regex:           '^<.*'
+    Priority:        9000
+# local
+  - Regex:           '^"ui_.*\.h"'
+    Priority:        1
+  - Regex:           '^".*\.(h|hpp)"'
+    Priority:        2
+
+IndentCaseLabels: false
+# IndentPPDirectives: BeforeHash
+IndentWidth: 4
+
+MaxEmptyLinesToKeep: 2
+
+NamespaceIndentation: None
+
+PointerAlignment: Left
+
+SortIncludes: true
+SortUsingDeclarations: true
+
+SpaceAfterCStyleCast: false
+
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+
+SpaceInEmptyParentheses: false
+
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+TabWidth: 4
+
+UseTab: Never

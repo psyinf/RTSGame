@@ -13,7 +13,8 @@ add_executable(${APP_NAME}
 
 target_link_libraries(${APP_NAME}
 	PRIVATE
-		RTSGame::Core		
+		RTSGame::Core
+		RTSGame::RenderCore
 		Boost::program_options
 		OPENSCENEGRAPH::osgWidget
 		Qt5::Core
@@ -35,6 +36,18 @@ set_target_properties(${APP_NAME} PROPERTIES
 )
 
 
+		
+set_target_properties(${APP_NAME} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+set_target_properties(${APP_NAME} PROPERTIES RELWITHDEBINFO_POSTFIX ${CMAKE_RELWITHDEBINFO_POSTFIX})
+
+
+
+
 install(TARGETS ${APP_NAME}
         CONFIGURATIONS Debug Release RelWithDebInfo 
         RUNTIME DESTINATION bin)
+
+
+set_target_properties(
+    ${APP_NAME} PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/bin")
