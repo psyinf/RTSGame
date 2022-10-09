@@ -1,11 +1,13 @@
 #include "RenderCore.h"
+#include <osgDB/Registry>
 
 using namespace renderer;
 RenderCore::RenderCore()
 {
-    createSubRoot("MAIN_ROOT");
-    createSubRoot("MODEL_ROOT");
-    createSubRoot("TERRAIN_ROOT");
+    createSubRoot("MAIN_ROOT", true);
+    createSubRoot("MODEL_ROOT", true);
+    createSubRoot("TERRAIN_ROOT", true);
+
 
     viewer->setSceneData(getMainRoot());
     viewer->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
@@ -23,7 +25,7 @@ osg::Group* RenderCore::getMainRoot()
 	return mainRoot;
 }
 
-void RenderCore::createSubRoot(const std::string& name)
+void RenderCore::createSubRoot(const std::string& name, bool addToMain)
 {
     if (namedRoots.contains(name))
     {
@@ -33,6 +35,11 @@ void RenderCore::createSubRoot(const std::string& name)
     osg::ref_ptr<osg::Group> group = new osg::Group;
     group->setName(name);
     namedRoots.try_emplace(name, group);
+
+    if (addToMain)
+    {
+        getMainRoot()->addChild(group);
+    }
 }
 
 
@@ -60,3 +67,4 @@ void RenderCore::frame()
 
     viewer->renderingTraversals();
 }
+USE_OSGPLUGIN(gdal)

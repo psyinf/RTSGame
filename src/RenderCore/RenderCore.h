@@ -13,7 +13,7 @@ public:
     osg::Group*               getMainRoot();
     osg::Group*              getSubRoot(const std::string& name);
     osgViewer::Viewer*        getViewer();
-    void                     createSubRoot(const std::string& name);
+    void                     createSubRoot(const std::string& name, bool addToMainRoot);
     void                      frame();
 
 	void setup();

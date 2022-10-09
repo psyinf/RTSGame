@@ -68,15 +68,16 @@ public:
 
 	osg::Camera*				getCamera() const;
 
-	const std::string&			getResourcePath();
+	const std::string&			getResourcePath() const;
 
-	bool			setupScene(const std::string& model_name);
+	bool			setupScene(const std::string& model_name) const;
 	
 	QTimer mQTimer;
 
 	void keyPressEvent(QKeyEvent * event) override;
 	void keyReleaseEvent(QKeyEvent* event) override;
-public:
+
+
     ViewerWidget( QWidget* parent, const char* name =0, WindowFlags flags =0, bool overrideTraits = false);
     void setup();
     // Prevent flicker on Windows Qt
@@ -103,7 +104,7 @@ private:
 	osg::ref_ptr<osgViewer::GraphicsWindow> mOsgGraphicsWindow;
 
     osgGA::EventQueue* getEventQueue() const;
-    void               setKeyboardModifiers(QInputEvent* event);
+    void               setKeyboardModifiers(QInputEvent* event) const;
     bool               mbOverrideTraits;
 	
 };

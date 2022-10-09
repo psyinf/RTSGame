@@ -210,7 +210,7 @@ osgGA::EventQueue* ViewerWidget::getEventQueue() const
 	}
 }
 
-void ViewerWidget::setKeyboardModifiers(QInputEvent* event)
+void ViewerWidget::setKeyboardModifiers(QInputEvent* event) const
 {
 
 	int modkey = event->modifiers() & (Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier);
@@ -221,7 +221,7 @@ void ViewerWidget::setKeyboardModifiers(QInputEvent* event)
 	getEventQueue()->getCurrentEventState()->setModKeyMask(mask);
 }
 
-bool ViewerWidget::setupScene( const std::string& model_name )
+bool ViewerWidget::setupScene( const std::string& model_name ) const
 {
     osg::ref_ptr<osg::Node> loaded_scene = osgDB::readNodeFile(model_name);
     
@@ -234,11 +234,11 @@ bool ViewerWidget::setupScene( const std::string& model_name )
 
 
 
-const std::string& ViewerWidget::getResourcePath()
+const std::string& ViewerWidget::getResourcePath() const 
 {
+	//TODO: return resource path from configuration
     static std::string respath = "data";
     return respath;
-	//XXX	return mRenderCore->getConfigRef().mEnvironment.mResourcePath;
 }
 
 
