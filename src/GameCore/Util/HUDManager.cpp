@@ -1,6 +1,7 @@
 #pragma once
 #include "HUDManager.h"
 #include "../GameCore.h"
+#include "RenderCore/RenderCore.h"
 
 bool nsGameCore::NamedLabel::mouseLeave( double, double, const osgWidget::WindowManager* )
 {
@@ -137,7 +138,7 @@ nsGameCore::HUDManager::~HUDManager()
 
 nsGameCore::HUDManager::HUDManager( GameCore& game_core ) :mrGameCore(game_core)
 {
-	osgViewer::Viewer* viewer = nullptr;//XXXgame_core.getRenderCore().getViewerRef();
+    osgViewer::Viewer* viewer = mrGameCore.getRenderCore().getViewer();
 	//XXX nsRenderer::Config config = game_core.getRenderCore().getConfigRef();
 
 	mWindowManager = new osgWidget::WindowManager(
@@ -173,7 +174,7 @@ nsGameCore::HUDManager::HUDManager( GameCore& game_core ) :mrGameCore(game_core)
 
 	mWindowManager->resizeAllWindows();
 	//TODO: This fucks up the scene and camera management. 
-	//XXX mrGameCore.getRenderCore().getSubRoot("MAIN_ROOT")->addChild(camera);
+	 mrGameCore.getRenderCore().getSubRoot("MAIN_ROOT")->addChild(camera);
 }
 
 nsGameCore::LabelMenu* nsGameCore::HUDManager::getMenu(const std::string& menu_name)
@@ -271,8 +272,8 @@ nsGameCore::NameValueLabel::NameValueLabel( const std::string& element_name )
 	addWidth(250.0);
 	mWindow->setAnchorVertical(osgWidget::Window::VA_TOP);
 	//set font
-	mNameLabel->setFont("./data/fonts/Data_Control.ttf");
-	mValueLabel->setFont("./data/fonts/Data_Control.ttf");
+	//XXX mNameLabel->setFont("./data/fonts/Data_Control.ttf");
+	//XXX mValueLabel->setFont("./data/fonts/Data_Control.ttf");
 	mWindow->getBackground()->setColor(0,0,0,0);
 	mWindow->resize();
 }

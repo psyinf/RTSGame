@@ -53,11 +53,18 @@ class ReaderWriterGDAL : public osgDB::ReaderWriter
         {
             supportsExtension("gdal","GDAL Image reader");
         }
+        bool acceptsExtension(const std::string& extension) const override
+        {
+            return osgDB::equalCaseInsensitive(extension, "gdal");
+        }
 
         virtual const char* className() const { return "GDAL Image Reader"; }
 
         virtual ReadResult readObject(const std::string& file, const osgDB::ReaderWriter::Options* options) const
         {
+        
+
+
             if (file.empty()) return ReadResult::FILE_NOT_FOUND;
 
             if (osgDB::equalCaseInsensitive(osgDB::getFileExtension(file),"gdal"))
@@ -83,6 +90,8 @@ class ReaderWriterGDAL : public osgDB::ReaderWriter
 
         virtual ReadResult readImage(const std::string& fileName, const osgDB::ReaderWriter::Options* options) const
         {
+          
+
             if (fileName.empty()) return ReadResult::FILE_NOT_FOUND;
 
             if (osgDB::equalCaseInsensitive(osgDB::getFileExtension(fileName),"gdal"))
@@ -96,6 +105,8 @@ class ReaderWriterGDAL : public osgDB::ReaderWriter
 
         virtual ReadResult readHeightField(const std::string& fileName, const osgDB::ReaderWriter::Options* options) const
         {
+           
+
             if (fileName.empty()) return ReadResult::FILE_NOT_FOUND;
 
             if (osgDB::equalCaseInsensitive(osgDB::getFileExtension(fileName),"gdal"))

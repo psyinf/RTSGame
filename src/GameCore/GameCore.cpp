@@ -37,7 +37,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	
 	mTerrain.reset(new nsGameCore::Terrain(*this));
 	mTerrain->getTerrainNode()->setNodeMask(0x0000ffff);
-	mTerrain->load("./data/levels/Canyon/canyon.tif" );
+	mTerrain->load("./data/levels/Channelled land.tif" );
     mrRenderCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
     mrRenderCore.getMainRoot()->addChild(mrRenderCore.getSubRoot("MAIN_ROOT"));
 	mModelManager.reset(new nsGameCore::GameModelManager("./data/models"));
@@ -63,7 +63,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	// XXX nsRenderer::CamResizeHandler* cam_resize_handler = new nsRenderer::CamResizeHandler(mHUDCamera);
 	// XXX mrCore.addEventHandler(cam_resize_handler);
 	
-	mHUDManager = boost::shared_ptr<HUDManager>(new HUDManager(*this));
+	mHUDManager = std::make_shared<nsGameCore::HUDManager>(*this);
 	//
 	std::vector<std::string> buildings;
 	mModelManager->getRegisteredModelNames(buildings);
@@ -176,6 +176,11 @@ nsGameCore::CellDataPtr nsGameCore::GameCore::getCellData( const CellAdress& add
 void nsGameCore::GameCore::setCellData( const CellAdress& address, CellDataPtr cell_data_ptr )
 {
 	mGameArea->setCellData(address, cell_data_ptr);
+}
+
+renderer::RenderCore& nsGameCore::GameCore::getRenderCore()
+{
+    return mrRenderCore;
 }
 
 nsGameCore::GameModelManager& nsGameCore::GameCore::getModelManager()
@@ -331,7 +336,7 @@ nsGameCore::NamedValue& nsGameCore::GameCore::addNamedValue( const std::string& 
 	throw std::runtime_error("Unregistered NamedValue:" + name);
 }
 
-boost::shared_ptr<nsGameCore::HUDManager> nsGameCore::GameCore::getHUDManager()
+std::shared_ptr<nsGameCore::HUDManager> nsGameCore::GameCore::getHUDManager()
 {
 	return mHUDManager;
 }

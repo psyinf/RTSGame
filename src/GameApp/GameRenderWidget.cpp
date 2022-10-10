@@ -166,8 +166,8 @@ void ViewerWidget::createContext()
 
 
 
-	//XXX mRenderCore->setStatsHandler(new osgViewer::StatsHandler());
-    
+	mRenderCore->getViewer()->addEventHandler(new osgViewer::StatsHandler);
+    mRenderCore->getViewer()->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 	    
 	mRenderCore->getViewer()->getCamera()->setGraphicsContext( mOsgGraphicsWindow );
     mRenderCore->getViewer()->getCamera()->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));

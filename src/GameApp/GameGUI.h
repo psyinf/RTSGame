@@ -21,7 +21,7 @@ class DesktopMainWindow : public QMainWindow
 		DesktopMainWindow( std::string& filename, bool viewer_mode, int dock_pos);
 		
 	private:
-		Ui::PilotDriverGUI* ui;
+        Ui::RTSGameGUI* ui;
 
 		void initUi();
 		void replaceDefaultStylesheetValues( QString &style );

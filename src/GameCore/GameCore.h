@@ -177,7 +177,7 @@ public:
 	
 
 
-	//nsRenderer::Core& getRenderCore();
+	renderer::RenderCore& getRenderCore();
 
 	nsGameCore::GameModelManager& getModelManager();
 	
@@ -201,7 +201,7 @@ public:
 
 	nsGameCore::NamedValue& addNamedValue(const std::string& name, const NamedValue::ValueType& value_type );
 	
-	boost::shared_ptr<nsGameCore::HUDManager> getHUDManager();
+	std::shared_ptr<nsGameCore::HUDManager> getHUDManager();
 
 	std::shared_ptr<nsGameCore::GameArea>	getGameArea();
 
@@ -220,7 +220,7 @@ protected:
 	osg::ref_ptr<osg::Camera>							mHUDCamera;
 	std::map<std::string, osg::ref_ptr<osgText::Text>> mHUDTextElements;
 	
-	boost::shared_ptr<nsGameCore::HUDManager>			mHUDManager;
+	std::shared_ptr<nsGameCore::HUDManager>			mHUDManager;
 
 	std::map<std::string, NamedValue>					mNamedValues;
 	Properties											mProperties;

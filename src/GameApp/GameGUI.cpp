@@ -9,8 +9,8 @@
 DesktopMainWindow::DesktopMainWindow( std::string& filename, bool viewer_mode, int dock_pos)
 
 : mModelToLoadByArg(filename)
-, ui(new Ui::PilotDriverGUI)
-, mFullScreen(viewer_mode)
+    , ui(new Ui::RTSGameGUI)
+    , mFullScreen(viewer_mode)
 {
 	initUi();
 
