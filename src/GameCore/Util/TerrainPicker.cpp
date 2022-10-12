@@ -1,6 +1,8 @@
 #include "TerrainPicker.h"
 #include <GameCore/GameCore.h>
 #include <GameCore/GameArea.h>
+#include <RenderCore/RenderCore.h>
+
 #include "TerrainTechniques.h"
 
 #include "GameModels.h"
@@ -152,6 +154,7 @@ void nsGameCore::PickHandler::levelTerrain( osgViewer::View* view, const osgGA::
 
 bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa )
 {
+   
 	if (osgGA::GUIEventAdapter::FRAME == ea.getEventType())
 	{
 		return false;
@@ -160,6 +163,7 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	bool treat_as_handled =false;
 	//determine mode
 	bool is_active = (ea.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_SHIFT);
+    std::cout << ea.getModKeyMask() << std::endl;
 	bool is_terrain_mode = is_active && boost::istarts_with(mrGameCore.getCurrentEditMode().getCurrentModeName(),"TERRAIN");
 	bool is_place_mode = is_active && boost::istarts_with(mrGameCore.getCurrentEditMode().getCurrentModeName(),"PLACE");
 	std::string sub_edit_mode = mrGameCore.getCurrentEditMode().getSubMode();
@@ -173,13 +177,15 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	{
 		return false;
 	}
-	//highlightSelected(view, ea);
+	//TODO: limit picking
+
+	/*--
 	bool pick_info = mCurrentPickInfo.pick(view, ea);
 	if (pick_info)
 	{
 		highlightSelected();
 	}
-
+	*/
 	switch(ea.getEventType())
 	{
 	case(osgGA::GUIEventAdapter::PUSH):
@@ -279,22 +285,22 @@ nsGameCore::PickHandler::~PickHandler()
 }
 
 nsGameCore::PickHandler::PickHandler(nsGameCore::GameCore& game_core)
-	:osgGA::GUIEventHandler()
-	,mrGameCore(game_core)
+    : osgGA::GUIEventHandler()
+    , mrGameCore(game_core)
 {
-	osgText::Text* text_node = new osgText::Text();
-	text_node->setFont("./fonts/arial.ttf");
-	text_node->setPosition(osg::Vec3(20.0,500,0.0));
-	mrGameCore.createNamedTextObject("CurrentMode", text_node);
+    osgText::Text* text_node = new osgText::Text();
+    text_node->setFont("./fonts/arial.ttf");
+    text_node->setPosition(osg::Vec3(20.0, 500, 0.0));
+    mrGameCore.createNamedTextObject("CurrentMode", text_node);
 
-	osgText::Text* sub_text_node = new osgText::Text();
-	sub_text_node->setFont("./fonts/arial.ttf");
-	sub_text_node->setPosition(osg::Vec3(20.0,600,0.0));
-	mrGameCore.createNamedTextObject("CurrentSubMode", sub_text_node);
+    osgText::Text* sub_text_node = new osgText::Text();
+    sub_text_node->setFont("./fonts/arial.ttf");
+    sub_text_node->setPosition(osg::Vec3(20.0, 600, 0.0));
+    mrGameCore.createNamedTextObject("CurrentSubMode", sub_text_node);
 
-	
-	osg::Geode* selection_geometry = createFaceSelector();
-	//XXX mrGameCore.getRenderCore().getSubRoot("MODEL_ROOT")->addChild(selection_geometry);
+
+    osg::Geode* selection_geometry = createFaceSelector();
+    mrGameCore.getRenderCore().getSubRoot("MODEL_ROOT")->addChild(selection_geometry);
 }
 
 void nsGameCore::PickHandler::getFace(const osgUtil::LineSegmentIntersector::Intersection& intersection )

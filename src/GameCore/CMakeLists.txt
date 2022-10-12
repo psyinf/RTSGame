@@ -1,5 +1,6 @@
 file(GLOB_RECURSE header_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h") 
 file(GLOB_RECURSE cpp_files "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_library(GameCore STATIC
 	${header_files}			${cpp_files}
@@ -12,8 +13,14 @@ target_link_libraries(GameCore
 		Boost::headers
 		OPENSCENEGRAPH::osg
 		OPENSCENEGRAPH::osgTerrain
+	PRIVATE
+		nlohmann_json::nlohmann_json
+	
 )
 
-target_include_directories(GameCore INTERFACE
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
+target_include_directories(GameCore
+	INTERFACE
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_INSTALL_PREFIX}/${LIB_NAME}>
+	PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )

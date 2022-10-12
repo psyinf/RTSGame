@@ -1,12 +1,14 @@
 #include "GameCore.h"
 #include "GameArea.h"
 #include "RenderCore/RenderCore.h"
+#include "RenderCore/CamResizeHandler.h"
 
 #include "Util/GameTerrain.h"
 #include "Util/GameModels.h"
 #include "Util/HUDManager.h"
 
 #include "GameLogic.h"
+
 
 #include <boost/algorithm/string.hpp>
 
@@ -15,6 +17,11 @@
 
 #include <osg/PositionAttitudeTransform>
 
+struct SetConfig
+{
+    std::string name      = "default.json";
+   
+};
 nsGameCore::GameCore::GameCore(  renderer::RenderCore& render_core ) 
 	:mrRenderCore(render_core)
 
@@ -28,16 +35,18 @@ void nsGameCore::GameCore::frame()
 	{
 		mGameLogic->frame();	
 	}
-	
 }
 
 void nsGameCore::GameCore::setup( const std::string& configuration )
 {
 	//Todo: from configuration
-	
+    SetConfig setConf;
+    
 	mTerrain.reset(new nsGameCore::Terrain(*this));
 	mTerrain->getTerrainNode()->setNodeMask(0x0000ffff);
-	mTerrain->load("./data/levels/Channelled land.tif" );
+    //#TODO: filesystem paths
+    mTerrain->load("./data/levels/" + setConf.name);
+
     mrRenderCore.getMainRoot()->addChild(mTerrain->getTerrainNode());
     mrRenderCore.getMainRoot()->addChild(mrRenderCore.getSubRoot("MAIN_ROOT"));
 	mModelManager.reset(new nsGameCore::GameModelManager("./data/models"));
@@ -60,8 +69,7 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	
 	
 	mrRenderCore.getMainRoot()->addChild(mHUDCamera);
-	// XXX nsRenderer::CamResizeHandler* cam_resize_handler = new nsRenderer::CamResizeHandler(mHUDCamera);
-	// XXX mrCore.addEventHandler(cam_resize_handler);
+    mrRenderCore.getViewer()->addEventHandler(new renderer::CamResizeHandler(mHUDCamera));
 	
 	mHUDManager = std::make_shared<nsGameCore::HUDManager>(*this);
 	//
@@ -70,16 +78,15 @@ void nsGameCore::GameCore::setup( const std::string& configuration )
 	mHUDManager->addMenu("Buildings");
 	mHUDManager->addMenu("Terrain");
 	mHUDManager->addMenu("Debug");
-/*	for (auto building : buildings)
-	{ XXX
-		mHUDManager->getMenu("Buildings")->addEntry(building, [this,&building]() { this->setModeAndEditMode("Place", building)});
+	for (auto building : buildings)
+	{	
+		mHUDManager->getMenu("Buildings")->addEntry(building, [this, &building]() { this->setModeAndEditMode("Place", building); });
 	}
-	mHUDManager->getMenu("Terrain")->addEntry("Raise", [=]() {this->setModeAndEditMode("Terrain", "Up"); });
-	mHUDManager->getMenu("Terrain")->addEntry("Lower", [this]() {this->setModeAndEditMode("Terrain", "Down"); });
-	mHUDManager->getMenu("Terrain")->addEntry("Level", [this]() {this->setModeAndEditMode("Terrain", "Level"); });
-	*/
-	mHUDManager->getMenu("Terrain")->addEntry("Raise", std::function<void()>(std::bind(&GameCore::setModeAndEditMode, this, "Terrain", "Up")));
-	mHUDManager->getMenu("Terrain")->addEntry("Raise", [=]() {this->setModeAndEditMode("Terrain", "Up"); });
+	
+	//mHUDManager->getMenu("Terrain")->addEntry("Raise", std::function<void()>(std::bind(&GameCore::setModeAndEditMode, this, "Terrain", "Up")));
+	mHUDManager->getMenu("Terrain")->addEntry("Raise", [this]() {this->setModeAndEditMode("Terrain", "Up"); });
+    mHUDManager->getMenu("Terrain")->addEntry("Lower", [this]() { this->setModeAndEditMode("Terrain", "Down"); });
+    mHUDManager->getMenu("Terrain")->addEntry("Level", [this]() { this->setModeAndEditMode("Terrain", "Level"); });
 	mGameLogic.reset(new GameLogic(*this));
 
 }
@@ -173,7 +180,7 @@ nsGameCore::CellDataPtr nsGameCore::GameCore::getCellData( const CellAdress& add
 	return mGameArea->getCellData(address);
 }
 
-void nsGameCore::GameCore::setCellData( const CellAdress& address, CellDataPtr cell_data_ptr )
+void nsGameCore::GameCore::setCellData( const CellAdress& address, CellDataPtr cell_data_ptr ) const
 {
 	mGameArea->setCellData(address, cell_data_ptr);
 }
@@ -190,6 +197,8 @@ nsGameCore::GameModelManager& nsGameCore::GameCore::getModelManager()
 
 void nsGameCore::GameCore::setModeAndEditMode( const std::string& mode, const std::string& sub_mode )
 {
+	//TODO: log
+    std::cout << "Mode " << mode << " Edit mode: " << sub_mode << std::endl;
 	mCurrentEditMode.setMode(mode);
 	mCurrentEditMode.setSubMode(sub_mode);
 }

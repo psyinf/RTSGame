@@ -162,7 +162,7 @@ protected:
 class GameCore
 {
 public:
-	GameCore(renderer::RenderCore& renderCore);
+	explicit GameCore(renderer::RenderCore& renderCore);
 	~GameCore() = default;
 
 	void setup(const std::string& configuration);
@@ -173,7 +173,7 @@ public:
 
 	CellDataPtr getCellData(const CellAdress& address);
 
-	void setCellData(const CellAdress& address, CellDataPtr cell_data_ptr);
+	void setCellData(const CellAdress& address, CellDataPtr cell_data_ptr) const;
 	
 
 
@@ -206,7 +206,7 @@ public:
 	std::shared_ptr<nsGameCore::GameArea>	getGameArea();
 
 	Properties& getProperties();
-protected:
+private:
 	EditMode											mCurrentEditMode;
 	
 	renderer::RenderCore&								mrRenderCore;

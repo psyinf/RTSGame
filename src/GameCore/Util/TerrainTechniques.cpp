@@ -10,7 +10,7 @@
 
 osg::Vec3d sampleUniform(float u1, float u2)
 {
-/* XXX
+/* Later
 	const float r = gmtl::Math::sqrt(1.0f - u1 * u1);
 	const float phi = 2 * osg::PI * u2;
 	osg::Vec3d result = osg::Vec3d(gmtl::Math::cos(phi) * r, gmtl::Math::sin(phi) * r, u1);	
@@ -158,7 +158,7 @@ bool osgTerrain::ModifyingTerrainTechnique::getExtents(osg::Vec3d& top_left, osg
 {
 	if (_terrainTile && _terrainTile->getLocator())
 	{
-		osgTerrain::Locator* locator = _terrainTile->getLocator();
+		osgTerrain::Locator const* locator = _terrainTile->getLocator();
 		locator->convertLocalToModel(osg::Vec3d(0,0,0), top_left);
 		locator->convertLocalToModel(osg::Vec3d(1,1,0), bottom_right);
 		return true;
@@ -196,7 +196,7 @@ osg::Vec3i osgTerrain::ModifyingTerrainTechnique::getTilePosition( const osg::Ve
 
 void osgTerrain::ModifyingTerrainTechnique::calculateAmbientApperture()
 {
-	/* XXX
+	/* Later
 	HeightFieldLayer* hfl = dynamic_cast<HeightFieldLayer*>( getTerrainTile()->getElevationLayer() );
 	if (hfl)
 	{

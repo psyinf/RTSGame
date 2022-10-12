@@ -6,7 +6,7 @@
 
 
 
-DesktopMainWindow::DesktopMainWindow( std::string& filename, bool viewer_mode, int dock_pos)
+DesktopMainWindow::DesktopMainWindow(const std::string& filename, bool viewer_mode, int dock_pos)
 
 : mModelToLoadByArg(filename)
     , ui(new Ui::RTSGameGUI)
@@ -18,11 +18,6 @@ DesktopMainWindow::DesktopMainWindow( std::string& filename, bool viewer_mode, i
 	mOsgViewerWidget->setMouseTracking(true);
 
 	this->setMouseTracking(true);
-//	this->setWindowFlags(Qt::FramelessWindowHint);
-// 	setGeometry(0,0,1920,1200);
-// 	showFullScreen();
-//	QWidget::setGeometry(QApplication::desktop()->availableGeometry());
-
 	loadAndSetStylesheet();
 
 

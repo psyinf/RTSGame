@@ -3,10 +3,6 @@
 #include <QMainWindow>
 #include <QTime>
 
-
-
-//#include <QtUiTools/QUiLoader>
-
 #include "GameRenderWidget.h"
 
 #include "ui_GameGUI.h"
@@ -18,13 +14,12 @@ class DesktopMainWindow : public QMainWindow
 	Q_OBJECT
 	
 	public:
-		DesktopMainWindow( std::string& filename, bool viewer_mode, int dock_pos);
+		DesktopMainWindow(const std::string& filename, bool viewer_mode, int dock_pos);
 		
 	private:
         Ui::RTSGameGUI* ui;
 
 		void initUi();
-		void replaceDefaultStylesheetValues( QString &style );
 		void loadAndSetStylesheet();
 
 

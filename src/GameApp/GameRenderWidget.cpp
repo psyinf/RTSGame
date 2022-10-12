@@ -94,14 +94,14 @@ static QtKeyboardMap sQtKeyBoardMap;
 
 void ViewerWidget::keyPressEvent(QKeyEvent * event)
 {
-//	setKeyboardModifiers(event);
+	setKeyboardModifiers(event);
 	int value = sQtKeyBoardMap.remapKey(event);
 	getEventQueue()->keyPress(value);
 }
 
 void ViewerWidget::keyReleaseEvent(QKeyEvent* event)
 {
-//	setKeyboardModifiers(event);
+setKeyboardModifiers(event);
 	int value = sQtKeyBoardMap.remapKey(event);
 	getEventQueue()->keyRelease(value);
 }
@@ -218,6 +218,7 @@ void ViewerWidget::setKeyboardModifiers(QInputEvent* event) const
 	if (modkey & Qt::ShiftModifier) mask |= osgGA::GUIEventAdapter::MODKEY_SHIFT;
 	if (modkey & Qt::ControlModifier) mask |= osgGA::GUIEventAdapter::MODKEY_CTRL;
 	if (modkey & Qt::AltModifier) mask |= osgGA::GUIEventAdapter::MODKEY_ALT;
+    std::cout << modkey << " "<< mask << std::endl;
 	getEventQueue()->getCurrentEventState()->setModKeyMask(mask);
 }
 

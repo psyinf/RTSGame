@@ -12,15 +12,15 @@ namespace osgTerrain {
 		/** Copy constructor using CopyOp to manage deep vs shallow copy.*/
 		ModifyingTerrainTechnique(const osgTerrain::GeometryTechnique& technique,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY);
 
-		META_Object(osgTerrain, ModifyingTerrainTechnique);
+		//(osgTerrain, ModifyingTerrainTechnique);
 
-		~ModifyingTerrainTechnique();
+		~ModifyingTerrainTechnique() override;
 
-		virtual void init(int dirtyMask, bool assumeMultiThreaded);
+		void init(int dirtyMask, bool assumeMultiThreaded) override;
 
-		virtual void update( osgUtil::UpdateVisitor* nv );
+		void update( osgUtil::UpdateVisitor* nv ) override;
 
-		virtual void traverse( osg::NodeVisitor& nv );
+		void traverse( osg::NodeVisitor& nv ) override;
 
 		bool setHeight(double x, double y, double height);
 
@@ -38,7 +38,7 @@ namespace osgTerrain {
 
 		void calculateAmbientApperture();
 
-		virtual void generateGeometry(  osgTerrain::GeometryTechnique::BufferData& buffer,osgTerrain::Locator* masterLocator, const osg::Vec3d& centerModel  );
+		void generateGeometry(  osgTerrain::GeometryTechnique::BufferData& buffer,osgTerrain::Locator* masterLocator, const osg::Vec3d& centerModel  ) override;
 
 	};
 

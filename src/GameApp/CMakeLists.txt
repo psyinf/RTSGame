@@ -1,4 +1,5 @@
 set(APP_NAME GameApp)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 file(GLOB HEADER_FILES 	"*.h")
 file(GLOB CPP_FILES 	"*.cpp")
@@ -19,15 +20,21 @@ target_link_libraries(${APP_NAME}
 		OPENSCENEGRAPH::osgWidget
 		Qt5::Core
 		Qt5::Widgets
+	INTERFACE
+		nlohmann_json::nlohmann_json
+)
+
+target_include_directories(GameCore
+	INTERFACE
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_INSTALL_PREFIX}/${LIB_NAME}>
+	PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" 
 			FILES ${HEADER_FILES} ${CPP_FILES}
 			)
 
-target_include_directories(${APP_NAME} PRIVATE
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-)
 
 set_target_properties(${APP_NAME} PROPERTIES
 	AUTOMOC	ON

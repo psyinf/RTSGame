@@ -157,7 +157,6 @@ nsGameCore::HUDManager::HUDManager( GameCore& game_core ) :mrGameCore(game_core)
 	camera->addChild(mWindowManager);
 	
 	viewer->addEventHandler(new osgWidget::MouseHandler(mWindowManager));
-	//viewer->addEventHandler(new osgWidget::KeyboardHandler(mWindowManager));
 	viewer->addEventHandler(new osgWidget::ResizeHandler(mWindowManager, camera));
 	viewer->addEventHandler(new osgWidget::CameraSwitchHandler(mWindowManager, camera));
 	//viewer.addEventHandler(new osgViewer::WindowSizeHandler());
@@ -272,8 +271,8 @@ nsGameCore::NameValueLabel::NameValueLabel( const std::string& element_name )
 	addWidth(250.0);
 	mWindow->setAnchorVertical(osgWidget::Window::VA_TOP);
 	//set font
-	//XXX mNameLabel->setFont("./data/fonts/Data_Control.ttf");
-	//XXX mValueLabel->setFont("./data/fonts/Data_Control.ttf");
+	//mNameLabel->setFont("./data/fonts/Data_Control.ttf");
+	//mValueLabel->setFont("./data/fonts/Data_Control.ttf");
 	mWindow->getBackground()->setColor(0,0,0,0);
 	mWindow->resize();
 }

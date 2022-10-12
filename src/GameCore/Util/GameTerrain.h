@@ -19,10 +19,10 @@ class GameCore;
 class Terrain
 {
 public:
-	Terrain(nsGameCore::GameCore& ref_core);
+	explicit Terrain(nsGameCore::GameCore& ref_core);
 	~Terrain();
 
-	void load(const std::string& base_name);
+	void load(const std::string& descriptor);
 
 	osg::ref_ptr<osg::Group> getTerrainNode();
 

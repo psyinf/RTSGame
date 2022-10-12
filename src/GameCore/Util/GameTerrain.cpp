@@ -1,48 +1,60 @@
 #include "GameTerrain.h"
 #include <GameCore/GameCore.h>
+#include <RenderCore/RenderCore.h>
 #include <GameCore/Util/TerrainPicker.h>
 #include <osgDB/FileNameUtils>
 #include <osg/PolygonOffset>
 #include <osg/PolygonMode>
 #include <osg/Material>
 #include <osgTerrain/DisplacementMappingTechnique>
-//#include <Common/CustomShader/CustomShaderProgram.h>
+
+#include "Util/Config.h"
+#include <nlohmann/json.hpp>
+namespace config
+{
+struct TerrainDescriptor
+{
+    std::string diffuse;
+    std::string height;
+    float       height_scale = 1.0;
+};
 
 
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TerrainDescriptor, diffuse, height, height_scale)
+}
+
+ // namespace config
 osg::ref_ptr<osg::Group> nsGameCore::Terrain::getTerrainNode()
 {
 	return mTerrain;
 }
 
-void nsGameCore::Terrain::load( const std::string& base_name )
+void nsGameCore::Terrain::load( const std::string& descriptor )
 {
+    config::TerrainDescriptor            desc              = config::load<config::TerrainDescriptor>(descriptor);
+    /*
 	const std::string height_field_path = osgDB::getNameLessExtension(base_name) + "_height" + osgDB::getFileExtensionIncludingDot(base_name) +".gdal";
 	const std::string diff_field_path = osgDB::getNameLessExtension(base_name) + "_diff" + osgDB::getFileExtensionIncludingDot(base_name) +".gdal";
+	*/
 	osg::ref_ptr<osgDB::Options> options = new osgDB::Options;
 	options->setBuildKdTreesHint(osgDB::Options::BUILD_KDTREES);
 
 
-	osg::HeightField* height_field = osgDB::readHeightFieldFile(height_field_path,options);
-	//osg::ref_ptr<osgTerrain::ModifyingTerrainTechnique> terrain_geometry_technique = new osgTerrain::ModifyingTerrainTechnique();
-	osg::ref_ptr<osgTerrain::DisplacementMappingTechnique> terrain_geometry_technique = new osgTerrain::DisplacementMappingTechnique();
-	//terrain_geometry_technique->setFilterMatrixAs(osgTerrain::GeometryTechnique::GAUSSIAN);
-	mTerrain->getOrCreateStateSet()->setDefine("LIGHTING", osg::StateAttribute::OVERRIDE);
-	mTerrain->getOrCreateStateSet()->setDefine("HEIGHTFIELD_LAYER", osg::StateAttribute::OVERRIDE);
-	mTerrain->getOrCreateStateSet()->setDefine("COMPUTE_DIAGONALS", osg::StateAttribute::OVERRIDE);
+	osg::HeightField*                                   height_field               = osgDB::readHeightFieldFile(desc.height + ".gdal", options);
+	osg::ref_ptr<osgTerrain::ModifyingTerrainTechnique> terrain_geometry_technique = new osgTerrain::ModifyingTerrainTechnique();
+	terrain_geometry_technique->setFilterMatrixAs(osgTerrain::GeometryTechnique::GAUSSIAN);
 	
-
 	if (!height_field)
 	{
-		throw (std::runtime_error("Cannot load specified height field: " + base_name));
+		throw (std::runtime_error("Cannot load specified height field: " + desc.height));
 	}
 	
 	//try to find a visual layer
-	
-
 	//create a locator to move/scale the data
 	osg::ref_ptr<osgTerrain::Locator> Locator1 = new osgTerrain::Locator;
 	Locator1->setCoordinateSystemType( osgTerrain::Locator::PROJECTED );
-	Locator1->setTransformAsExtents( 0.0, 0.0, mTileSize[0], mTileSize[1] );
+	
+	Locator1->setTransformAsExtents(0.0, 0.0, height_field->getNumColumns(), height_field->getNumRows());
 
 	//create a height field layer from the height field, using the locator
 	osg::Texture::FilterMode filter = osg::Texture::LINEAR;
@@ -50,7 +62,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	osg::ref_ptr<osgTerrain::HeightFieldLayer> hf_layer = new osgTerrain::HeightFieldLayer(height_field);
 	hf_layer->setLocator(Locator1);
 	hf_layer->setMagFilter(filter);
-	hf_layer->transform(0,0.01);
+	hf_layer->transform(0,desc.height_scale);
 	//create a terrain-tile and add the height field
 	osg::ref_ptr<osgTerrain::TerrainTile> terrain_tile = new osgTerrain::TerrainTile;
 	terrain_tile->setElevationLayer( hf_layer.get() );
@@ -60,7 +72,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	terrain_tile->setTerrainTechnique(terrain_geometry_technique);
 	terrain_tile->setDirty(true);
 	
-	osg::Image* diffuse_texture = osgDB::readImageFile(diff_field_path);
+	osg::Image* diffuse_texture = osgDB::readImageFile(desc.diffuse +".gdal");
 	if (diffuse_texture)
 	{
 		terrain_tile->setColorLayer(0, new osgTerrain::ImageLayer(diffuse_texture));
@@ -72,15 +84,7 @@ void nsGameCore::Terrain::load( const std::string& base_name )
 	
 	osg::ref_ptr<osgGA::EventHandler> pick_handler = new nsGameCore::PickHandler(mrGameCore);
 	
-	//XXX mrGameCore.getRenderCore().addEventHandler(pick_handler);
-
-	//////////////////////////////////////////////////////////////////////////
-
-	//terrain_geometry_technique->calculateAmbientApperture();
-	
-	//nsRenderer::ShaderProgram* program = nsRenderer::ShaderProgramHelpers::loadProgram("data/shaders/Terrain", nsRenderer::ShaderInfo());
-	//mTerrain->getOrCreateStateSet()->setAttribute(program, osg::StateAttribute::ON);
-
+	mrGameCore.getRenderCore().getViewer()->addEventHandler(pick_handler);
 }
 
 nsGameCore::Terrain::~Terrain()
