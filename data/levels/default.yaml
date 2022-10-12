@@ -1,0 +1,4 @@
+
+diffuse: data/levels/Channelled land_diff.tif
+height 	: data/levels/Channelled land_height.tif
+height_scale : 0.1

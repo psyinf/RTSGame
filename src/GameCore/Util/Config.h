@@ -1,5 +1,6 @@
 #pragma once
 #include <nlohmann/json.hpp>
+#include <yaml-cpp/yaml.h>
 #include <any>
 #include <string>
 #include <map>
@@ -8,12 +9,54 @@
 
 namespace config
 {
+// see https://github.com/mircodezorzi/tojson/blob/master/tojson.hpp
+inline nlohmann::json parse_scalar(const YAML::Node& node)
+{
+    int         i;
+    double      d;
+    bool        b;
+    std::string s;
+
+    if (YAML::convert<int>::decode(node, i))
+        return i;
+    if (YAML::convert<double>::decode(node, d))
+        return d;
+    if (YAML::convert<bool>::decode(node, b))
+        return b;
+    if (YAML::convert<std::string>::decode(node, s))
+        return s;
+
+    return nullptr;
+}
+
+/// \todo refactor and pass nlohmann::json down by reference instead of returning it
+inline nlohmann::json yaml2json(const YAML::Node& root)
+{
+    nlohmann::json j{};
+
+    switch (root.Type())
+    {
+    case YAML::NodeType::Null: break;
+    case YAML::NodeType::Scalar: return parse_scalar(root);
+    case YAML::NodeType::Sequence:
+        for (auto&& node : root)
+            j.emplace_back(yaml2json(node));
+        break;
+    case YAML::NodeType::Map:
+        for (auto&& it : root)
+            j[it.first.as<std::string>()] = yaml2json(it.second);
+        break;
+    default: break;
+    }
+    return j;
+}
 
 template <class T>
-static T load(const std::string& fileName)
+inline static T load(const std::string& fileName)
 {
-
+    
     static std::map<std::string, std::any> configItems;
+    
     auto                                   iter = configItems.find(fileName);
     if (iter == configItems.end())
     {
@@ -23,9 +66,21 @@ static T load(const std::string& fileName)
             {
                 throw std::runtime_error("Cannot find config file: " + fileName);
             }
-            auto conf_item = nlohmann::json::parse(std::ifstream(fileName)).get<T>();
-            configItems.emplace(fileName, conf_item);
-            return conf_item;
+            if (fileName.ends_with(".json"))
+            {
+                auto conf_item = nlohmann::json::parse(std::ifstream(fileName)).get<T>();
+                configItems.emplace(fileName, conf_item);
+                return conf_item;
+            }
+            else if (fileName.ends_with(".yaml"))
+            {
+                YAML::Node config = YAML::LoadFile(fileName);
+                auto conf_item = yaml2json(config);
+                configItems.emplace(fileName, conf_item);
+                return conf_item;
+            }
+            throw std::invalid_argument("No parser for " + fileName);
+            
         }
         catch (const std::exception& e)
         {
@@ -39,4 +94,6 @@ static T load(const std::string& fileName)
         return conf_item;
     }
 }
+
+
 } // namespace config

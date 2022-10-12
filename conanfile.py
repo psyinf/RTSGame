@@ -14,6 +14,7 @@ class RTSGame(ConanFile):
                 ,("double-conversion/3.2.1")
                 ,("sqlite3/3.39.2") #conflict gdal and qt
                 ,("gdal/3.4.3")
+                ,("yaml-cpp/0.7.0")
                 ]
     generators = "cmake_find_package_multi"
     

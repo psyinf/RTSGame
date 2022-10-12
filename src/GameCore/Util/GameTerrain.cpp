@@ -20,7 +20,7 @@ struct TerrainDescriptor
 };
 
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TerrainDescriptor, diffuse, height, height_scale)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TerrainDescriptor, diffuse, height, height_scale)
 }
 
  // namespace config

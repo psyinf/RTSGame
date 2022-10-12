@@ -19,7 +19,7 @@
 
 struct SetConfig
 {
-    std::string name      = "default.json";
+    std::string name      = "default.yaml";
    
 };
 nsGameCore::GameCore::GameCore(  renderer::RenderCore& render_core ) 
