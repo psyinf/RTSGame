@@ -36,7 +36,7 @@ void nsGameCore::GameModel::addPropertyFromNode( nsXML::XMLNode &properties_node
 nsGameCore::GameModel::Type 
 nsGameCore::GameBuilding::getModelType() const
 {
-	return GameModel::MT_BUILDING;
+    return GameModel::Type::MT_BUILDING;
 }
 
 osg::ref_ptr<osg::Node>
@@ -88,7 +88,7 @@ nsGameCore::GameModelManager::GameModelManager( const std::string& path )
 	// XXX Directory::getFilesInDir(path, ret_files, "*.xml" );
 	for (auto iter = ret_files.begin(); iter != ret_files.end(); ++iter)
 	{
-		boost::shared_ptr<nsGameCore::GameModel> model = GameModelFactory::build(*this, path + "/" + *iter);
+		std::shared_ptr<nsGameCore::GameModel> model = GameModelFactory::build(*this, path + "/" + *iter);
 		if (model)
 		{
 			mGameModelMap.insert(std::make_pair(model->getModelDisplayName(), model));
@@ -109,7 +109,7 @@ bool nsGameCore::GameModelManager::loadModel( const std::string& model_name, con
 	return false;
 }
 
-boost::shared_ptr<nsGameCore::GameModel> nsGameCore::GameModelManager::createGameModelInstance( const std::string& model_name )
+std::shared_ptr<nsGameCore::GameModel> nsGameCore::GameModelManager::createGameModelInstance( const std::string& model_name )
 {
 	return mGameModelMap.at(model_name)->clone();
 }
@@ -253,7 +253,7 @@ void nsGameCore::GameBuilding::parse( const std::string& model_description_file 
 
 
 
-boost::shared_ptr<nsGameCore::GameModel> 
+std::shared_ptr<nsGameCore::GameModel> 
 nsGameCore::GameBuilding::clone()
 {
 	return GameModelFactory::build(mrGameModelManager, mModelTypeName);
@@ -264,19 +264,17 @@ nsGameCore::GameBuilding::GameBuilding( GameModelManager& game_model_manager, co
 	parse( model_type_name);
 }
 
-boost::shared_ptr<nsGameCore::GameModel> 
+std::shared_ptr<nsGameCore::GameModel> 
 nsGameCore::GameModelFactory::build( nsGameCore::GameModelManager& model_manager, const std::string& xml_description_file )
 {
-	try 
-	{
+	try {
 		/* XXX boost::scoped_ptr<nsXML::XMLData> xml_document(new nsXML::XMLData(xml_description_file));
 		const std::string model_type_name = xml_document->getNode().name();
 		*/
 		const std::string model_type_name = "GameModel";
 		if ("GameModel" == model_type_name)
 		{
-			boost::shared_ptr<GameModel> model(new GameBuilding(model_manager, xml_description_file));
-			return model;
+			return std::make_shared<nsGameCore::GameBuilding>(model_manager, xml_description_file);
 		}
 		else
 		{
@@ -286,7 +284,7 @@ nsGameCore::GameModelFactory::build( nsGameCore::GameModelManager& model_manager
 	catch (const std::exception& e)
 	{
 		std::cerr << "Error loading xml data for: " << e.what() << std::endl;
+        throw e;
 	}
-	return boost::shared_ptr<GameModel>();
 	
 }

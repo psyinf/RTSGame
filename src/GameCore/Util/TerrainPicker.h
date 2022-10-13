@@ -11,7 +11,8 @@ namespace osgTerrain
 
 namespace nsGameCore{
 
-struct CellAdress;
+
+using CellAdress = osg::Vec3i;
 class GameCore;
 
 // class to handle events with a pick

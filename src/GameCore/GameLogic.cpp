@@ -3,6 +3,7 @@
 #include "GameArea.h"
 #include "Util/GameModels.h"
 #include "Util/HUDManager.h"
+#include <vector>
 
 using namespace nsGameCore;
 
@@ -87,12 +88,10 @@ void nsGameCore::GameLogic::frame()
 
 void nsGameCore::GameLogic::updateProduction()
 {
-	std::vector<nsGameCore::CellDataPtr> cell_datas;
-	cell_datas = mrGameCore.getGameArea()->getCellDatas();
+	auto cellDatas = mrGameCore.getGameArea()->getCellDatas();
 
-	for (auto iter = cell_datas.begin(); iter != cell_datas.end(); ++iter)
+	for (const auto& cell_data : cellDatas)
 	{
-		nsGameCore::CellDataPtr& cell_data = (*iter);
 		nsGameCore::GameBuilding* game_building = dynamic_cast<nsGameCore::GameBuilding*>(cell_data->model_instance.get());
 		if (!game_building)
 		{
@@ -171,12 +170,10 @@ void nsGameCore::GameLogic::updateCosts()
 
 void nsGameCore::GameLogic::updateConstruction()
 {
-	std::vector<nsGameCore::CellDataPtr> cell_datas;
-	cell_datas = mrGameCore.getGameArea()->getCellDatas();
+	auto cell_datas = mrGameCore.getGameArea()->getCellDatas();
 
-	for (auto iter = cell_datas.begin(); iter != cell_datas.end(); ++iter)
+	for (const auto& cell_data : cell_datas)
 	{
-		nsGameCore::CellDataPtr& cell_data = (*iter);
 		nsGameCore::GameBuilding* game_building = dynamic_cast<nsGameCore::GameBuilding*>(cell_data->model_instance.get());
 		if (!game_building)
 		{

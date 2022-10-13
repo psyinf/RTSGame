@@ -2,7 +2,7 @@ file(GLOB_RECURSE header_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 file(GLOB_RECURSE cpp_files "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
-
+find_package(magic_enum CONFIG REQUIRED)
 add_library(GameCore STATIC
 	${header_files}			${cpp_files}
 )
@@ -17,7 +17,7 @@ target_link_libraries(GameCore
 	PRIVATE
 		nlohmann_json::nlohmann_json
 		yaml-cpp::yaml-cpp
-	
+		magic_enum::magic_enum
 )
 
 target_include_directories(GameCore

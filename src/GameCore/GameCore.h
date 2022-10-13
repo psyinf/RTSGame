@@ -23,11 +23,10 @@ class GameModelManager;
 class GameModel;
 class HUDManager;
 struct CellData;
-struct CellAdress;
 class GameLogic;
 
-typedef boost::shared_ptr<CellData> CellDataPtr;
-
+using CellDataPtr = std::shared_ptr<CellData>;
+using CellAdress = osg::Vec3i;
 
 
 struct NamedValue

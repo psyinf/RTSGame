@@ -1,6 +1,5 @@
 #pragma once
 #include "osg/Node"
-#include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include "Properties.h"
@@ -13,9 +12,9 @@ class GameModel;
 class GameModelManager
 {
 	
-	typedef std::map<std::string, osg::ref_ptr<osg::Node>> ModelNodeMap;
-	typedef std::map<std::string, boost::shared_ptr<GameModel>> GameModelMap;
-	typedef std::set<std::string> ModelNames;
+	using ModelNodeMap = std::map<std::string, osg::ref_ptr<osg::Node>>;
+	using GameModelMap = std::map<std::string, std::shared_ptr<GameModel>>;
+	using ModelNames = std::set<std::string>;
 public:
 	GameModelManager(const std::string& path);
 
@@ -27,10 +26,10 @@ public:
 	
 	osg::ref_ptr<osg::Node> getModel(const std::string& model_name);
 
-	boost::shared_ptr<GameModel> createGameModelInstance(const std::string& model_name);
+	std::shared_ptr<GameModel> createGameModelInstance(const std::string& model_name);
 	//TODO: instances might be managed here
 	//effectively each model should manage its properties
-protected:
+private:
 	std::string		mModelPath;
 	ModelNodeMap	mRegisteredModels;
 	GameModelMap	mGameModelMap;
@@ -40,14 +39,14 @@ class GameModelFactory
 {
 public:
 
-	static boost::shared_ptr<GameModel> build(nsGameCore::GameModelManager& model_manager, const std::string& xml_description_file);
+	static std::shared_ptr<GameModel> build(nsGameCore::GameModelManager& model_manager, const std::string& xml_description_file);
 };
 
 
 class GameModel
 {
 public:
-	enum Type 
+	enum class Type 
 	{
 		MT_INVALID = 0,
 		MT_BUILDING
@@ -58,9 +57,8 @@ public:
 	GameModel(GameModelManager& game_model_manager, const std::string& model_type_name)
 		:mrGameModelManager(game_model_manager)
 		,mModelTypeName(model_type_name)
-		,mModelScale(1,1,1)
 	{}
-	virtual ~GameModel() {}
+    virtual ~GameModel() = default;
 
 	virtual osg::ref_ptr<osg::Node> getGraphicalModel() = 0;
 
@@ -70,7 +68,7 @@ public:
 	
 	virtual void parse(const std::string& model_description_file);
 
-	virtual boost::shared_ptr<GameModel> clone() = 0;
+	virtual std::shared_ptr<GameModel> clone() = 0;
 
 	Properties& getProperties();
 
@@ -87,7 +85,7 @@ protected:
 	osg::ref_ptr<osg::Node> mGraphicalModel;
 	Properties				mProperties;
 	osg::Matrix				mPlacementMatrix;
-	osg::Vec3				mModelScale;
+    osg::Vec3               mModelScale = {1,1,1};
 };
 
 
@@ -97,23 +95,15 @@ class GameBuilding : public GameModel
 public:
 	GameBuilding(GameModelManager& game_model_manager, const std::string& model_type_name);
 
-	virtual ~GameBuilding(){}
+	~GameBuilding() override = default;
 
-	virtual void parse(const std::string& model_description_file);
+	void parse(const std::string& model_description_file) override;
 
-	virtual boost::shared_ptr<GameModel> clone();
+	std::shared_ptr<GameModel> clone() override;
 
-	virtual Type getModelType() const;
+	Type getModelType() const override;
 
-	virtual osg::ref_ptr<osg::Node> getGraphicalModel();
-
-	
-protected:
-
-
-	
-protected:
-
+	osg::ref_ptr<osg::Node> getGraphicalModel() override;
 
 
 };

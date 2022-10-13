@@ -1,11 +1,11 @@
 #pragma once
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
 #include <osg/Vec3i>
-#include <boost/unordered_map.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/shared_ptr.hpp>
+
 namespace nsGameCore{
 
 class Terrain;
@@ -13,65 +13,41 @@ class GameCore;
 class GameModel;
 
 
-struct CellAdress
-{
-
-	CellAdress()
-		:coords(-1,-1,-1)
-	{
-
-	}
-
-	CellAdress(const osg::Vec3i& pos )
-	{
-		coords = pos;
-	}
-
-	bool operator ==(const CellAdress& rhs) const
-	{
-		return coords == rhs.coords;
-	}
-
-	friend std::size_t hash_value(const CellAdress& input)
-	{
-		std::size_t seed = 0;
-		boost::hash_combine(seed, input.coords[0]);
-		boost::hash_combine(seed, input.coords[1]);
-		boost::hash_combine(seed, input.coords[2]);
-		return seed;
-
-	}
-
-	void print()
-	{
-		std::cout << coords[0] << " " << coords[1] << std::endl;
-	}
-
-	osg::Vec3i coords;
-	
-};
 
 
+using CellAdress = osg::Vec3i;
 
 struct CellData
 {
-	CellData(const CellAdress& cell_address, boost::shared_ptr<GameModel>& model_instance)
+	explicit CellData(const CellAdress& cell_address, std::shared_ptr<GameModel> model_instance)
 		:address(cell_address)
 		,model_instance(model_instance)
 	{
 
 	}
 	CellAdress address;
-	boost::shared_ptr<GameModel> model_instance;
+	std::shared_ptr<GameModel> model_instance;
 };
 
-typedef boost::shared_ptr<CellData> CellDataPtr;
+struct CellAdressHasher
+{
+    std::size_t operator()(const CellAdress& cellAdress) const noexcept
+    {
+        std::size_t seed = 0;
+        boost::hash_combine(seed, cellAdress[0]);
+        boost::hash_combine(seed, cellAdress[1]);
+        boost::hash_combine(seed, cellAdress[2]);
+        return seed; 
+    }
+};
+
+using CellDataPtr = std::shared_ptr<CellData>;
 
 class GameArea
 {
 	
 public:
-	GameArea(nsGameCore::GameCore& ref_game_core);
+	explicit GameArea(nsGameCore::GameCore& ref_game_core);
 
 	bool isFree(const CellAdress& cell_address) const;
 
@@ -82,9 +58,9 @@ public:
 	void setCellData(const CellAdress& cell_address, CellDataPtr cell_data);
 
 	std::vector<CellDataPtr> getCellDatas() const;
-protected:
+private:
 
-	boost::unordered_map<CellAdress, CellDataPtr> mCellData;
+	std::unordered_map<CellAdress, CellDataPtr, CellAdressHasher> mCellData;
 	nsGameCore::GameCore& mrGameCore;
 };
 

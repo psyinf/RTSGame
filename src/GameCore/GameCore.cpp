@@ -139,7 +139,7 @@ void nsGameCore::GameCore::createNamedTextObject( const std::string& text_elem_n
 
 void nsGameCore::GameCore::placeModel( const CellAdress& address, const std::string& model_type, float height )
 {
-	boost::shared_ptr<nsGameCore::GameModel> game_model = mModelManager->createGameModelInstance(model_type);
+	std::shared_ptr<nsGameCore::GameModel> game_model = mModelManager->createGameModelInstance(model_type);
 	if (!game_model || !game_model->getGraphicalModel())
 	{
 		//TODO: bark here
@@ -147,15 +147,15 @@ void nsGameCore::GameCore::placeModel( const CellAdress& address, const std::str
 	}
 	osg::PositionAttitudeTransform* pat = new osg::PositionAttitudeTransform();
 	//get local offset
-	pat->setPosition(osg::Vec3d(address.coords.x(),address.coords.y(),address.coords.z() + height) + game_model->getPlacementMatrix().getTrans());
+	pat->setPosition(osg::Vec3d(address.x(),address.y(),address.z() + height) + game_model->getPlacementMatrix().getTrans());
 	pat->setAttitude(game_model->getPlacementMatrix().getRotate());
 	pat->setScale(game_model->getModelScale());
 	pat->addChild(game_model->getGraphicalModel());
 	pat->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON); 
 	mrRenderCore.getSubRoot("MODEL_ROOT")->addChild(pat);
 	
-	
-	setCellData(address, boost::shared_ptr<nsGameCore::CellData>(new nsGameCore::CellData(address, game_model)));
+	auto x = std::make_shared<nsGameCore::CellData>(address, game_model);
+	 setCellData(address, x);
 }
 
 

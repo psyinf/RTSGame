@@ -1,6 +1,8 @@
 #pragma once
 #include <nlohmann/json.hpp>
 #include <yaml-cpp/yaml.h>
+#include <magic_enum.hpp>
+
 #include <any>
 #include <string>
 #include <map>
@@ -9,6 +11,7 @@
 
 namespace config
 {
+
 // see https://github.com/mircodezorzi/tojson/blob/master/tojson.hpp
 inline nlohmann::json parse_scalar(const YAML::Node& node)
 {
@@ -29,15 +32,16 @@ inline nlohmann::json parse_scalar(const YAML::Node& node)
     return nullptr;
 }
 
-/// \todo refactor and pass nlohmann::json down by reference instead of returning it
 inline nlohmann::json yaml2json(const YAML::Node& root)
 {
     nlohmann::json j{};
 
     switch (root.Type())
     {
-    case YAML::NodeType::Null: break;
-    case YAML::NodeType::Scalar: return parse_scalar(root);
+    case YAML::NodeType::Null:
+        break;
+    case YAML::NodeType::Scalar: 
+        return parse_scalar(root);
     case YAML::NodeType::Sequence:
         for (auto&& node : root)
             j.emplace_back(yaml2json(node));
@@ -46,10 +50,13 @@ inline nlohmann::json yaml2json(const YAML::Node& root)
         for (auto&& it : root)
             j[it.first.as<std::string>()] = yaml2json(it.second);
         break;
-    default: break;
+    default: 
+        throw std::invalid_argument(std::format("Unkown yaml node type {0} cannot be transformed to JSON", magic_enum::enum_name( root.Type()) ));
+        break;
     }
     return j;
 }
+
 
 template <class T>
 inline static T load(const std::string& fileName)
@@ -69,14 +76,14 @@ inline static T load(const std::string& fileName)
             if (fileName.ends_with(".json"))
             {
                 auto conf_item = nlohmann::json::parse(std::ifstream(fileName)).get<T>();
-                configItems.emplace(fileName, conf_item);
+                configItems.try_emplace(fileName, conf_item);
                 return conf_item;
             }
             else if (fileName.ends_with(".yaml"))
             {
                 YAML::Node config = YAML::LoadFile(fileName);
                 auto conf_item = yaml2json(config);
-                configItems.emplace(fileName, conf_item);
+                configItems.try_emplace(fileName, conf_item);
                 return conf_item;
             }
             throw std::invalid_argument("No parser for " + fileName);
@@ -84,7 +91,7 @@ inline static T load(const std::string& fileName)
         }
         catch (const std::exception& e)
         {
-            throw std::runtime_error("Error reading " + fileName + ": " + e.what());
+            throw std::invalid_argument("Error reading " + fileName + ": " + e.what());
         }
     }
     else
