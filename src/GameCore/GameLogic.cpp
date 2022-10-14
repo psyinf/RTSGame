@@ -4,19 +4,20 @@
 #include "Util/GameModels.h"
 #include "Util/HUDManager.h"
 #include <vector>
+#include <string_view>
 
 using namespace nsGameCore;
 
 
 nsGameCore::GameLogic::GameLogic( GameCore& game_core ) 
 	:mrGameCore(game_core)
-	,mFrameNumber(0)
 {
-	/*
+	
 	//TODO: some functionality to bind valueName to display name
+	//TODO: move to setup and rename functionality to "registerNamedValue/Label
 	mrGameCore.addNamedValue("Credits", NamedValue::VT_INTEGRAL).setValue(1000);
 	mrGameCore.getHUDManager()->addNameValueLabel("$");
-	mrGameCore.addNamedValue("Energy", NamedValue::VT_INTEGRAL).setValue(1000);
+    mrGameCore.addNamedValue("Energy", NamedValue::VT_INTEGRAL).setValue(1000);
 	mrGameCore.getHUDManager()->addNameValueLabel("Energy");
 	mrGameCore.addNamedValue("H3", NamedValue::VT_INTEGRAL).setValue(1000);
 	mrGameCore.getHUDManager()->addNameValueLabel("H3");
@@ -28,7 +29,7 @@ nsGameCore::GameLogic::GameLogic( GameCore& game_core )
 	mrGameCore.getHUDManager()->addNameValueLabel("Air");
 	mrGameCore.addNamedValue("CM", NamedValue::VT_INTEGRAL).setValue(1000);
 	mrGameCore.getHUDManager()->addNameValueLabel("CM");
-	*/
+	
 	
 	registerGUIValue("Resources", "$", "Credits", 1000.0);
 	registerGUIValue("Resources", "E", "Energy", 1000.0);
@@ -98,7 +99,7 @@ void nsGameCore::GameLogic::updateProduction()
 			continue;
 		}
 		std::string model_type = cell_data->model_instance->getModelDisplayName();
-		//if (boost::iequals(model_type, "H3-Mine"))
+		if (iequals(model_type, "H3-Mine"))
 		{
 
 			bool  can_produce = nsGameCore::ValueRef<bool>(game_building->getProperties(), "Status", "IsProducing").get();

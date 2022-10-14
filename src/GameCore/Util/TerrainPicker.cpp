@@ -179,13 +179,13 @@ bool nsGameCore::PickHandler::handle( const osgGA::GUIEventAdapter& ea,osgGA::GU
 	}
 	//TODO: limit picking
 
-	/*--
+	//#TODO: this has terrible performance for large sets
 	bool pick_info = mCurrentPickInfo.pick(view, ea);
 	if (pick_info)
 	{
 		highlightSelected();
 	}
-	*/
+	
 	switch(ea.getEventType())
 	{
 	case(osgGA::GUIEventAdapter::PUSH):

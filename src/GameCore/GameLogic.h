@@ -9,9 +9,10 @@ class GameCore;
 class GameLogic
 {
 public:
-	GameLogic(GameCore& game_core);
+	explicit GameLogic(GameCore& game_core);
 
-	virtual void frame();
+	~GameLogic() = default;
+	void frame();
 
 	void updateProduction();
 
@@ -22,8 +23,8 @@ public:
 protected:
 	void registerGUIValue(const std::string& category, const std::string& display_name, const std::string& property_name, int value);
 	void updateGUIValue(const std::string& category, const std::string& property_name, const std::string& display_name);
-protected:
+private:
 	GameCore& mrGameCore;
-	unsigned int mFrameNumber;
+	unsigned int mFrameNumber  =0;
 };
 }
